@@ -1,20 +1,48 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { getStrategy, simulate } from "@/lib/api";
+
+import TelemetryChart from "@/components/TelemetryChart";
+import AIInsights from "@/components/AIInsights";
 
 export default function Dashboard() {
 
-  // INPUT STATE
+  const circuits = [
+    "Bahrain",
+    "Saudi Arabia",
+    "Australia",
+    "Japan",
+    "China",
+    "Miami",
+    "Imola",
+    "Monaco",
+    "Canada",
+    "Spain",
+    "Austria",
+    "Silverstone",
+    "Hungary",
+    "Belgium",
+    "Netherlands",
+    "Monza",
+    "Singapore",
+    "Austin",
+    "Mexico",
+    "Brazil",
+    "Las Vegas",
+    "Qatar",
+    "Abu Dhabi",
+  ];
+
   const [compound, setCompound] = useState("MEDIUM");
   const [tyreAge, setTyreAge] = useState(10);
   const [gapAhead, setGapAhead] = useState(5);
   const [gapBehind, setGapBehind] = useState(20);
-  const [circuit, setCircuit] = useState("Bahrain");
+  const [circuit, setCircuit] = useState("Monaco");
 
-  // OUTPUT STATE
   const [result, setResult] = useState<any>(null);
-  const [sim, setSim] = useState<any>(null);
+  const [simData, setSimData] = useState<any>(null);
 
   const payload = {
     compound,
@@ -24,49 +52,68 @@ export default function Dashboard() {
     gap_behind: gapBehind,
   };
 
-  // AUTO RUN (pro feel, no button spam)
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await getStrategy(payload);
-        const simRes = await simulate(payload);
-        setResult(res);
-        setSim(simRes);
+        const strategy = await getStrategy(payload);
+        const simulation = await simulate(payload);
+
+        setResult(strategy);
+        setSimData(simulation);
+
       } catch (err) {
         console.error(err);
       }
     };
 
     fetchData();
+
   }, [compound, tyreAge, gapAhead, gapBehind, circuit]);
 
   return (
     <main className="min-h-screen bg-[#050505] text-white flex">
 
       {/* LEFT PANEL */}
-      <div className="w-1/4 p-6 border-r border-zinc-800">
-        <h2 className="text-lg tracking-widest text-red-500 mb-6">
-          RACE INPUTS
-        </h2>
+      <div className="w-[22%] border-r panel-border p-6">
 
-        <div className="space-y-6 text-sm">
+        <div className="mb-10">
+          <p className="text-xs tracking-[0.4em] text-red-500 uppercase">
+            Race Inputs
+          </p>
+
+          <h1 className="text-3xl font-black mt-3 leading-tight">
+            Strategy Control
+          </h1>
+        </div>
+
+        <div className="space-y-7 text-sm">
 
           <div>
-            <label className="text-gray-400">Circuit</label>
+            <label className="text-zinc-500 uppercase text-xs tracking-[0.2em]">
+              Circuit
+            </label>
+
             <select
-              className="w-full bg-zinc-900 p-2 mt-1"
+              className="w-full bg-zinc-900 border border-zinc-800 p-3 mt-2 rounded-xl"
+              value={circuit}
               onChange={(e) => setCircuit(e.target.value)}
             >
-              <option>Bahrain</option>
-              <option>Monza</option>
-              <option>Silverstone</option>
+              {circuits.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
-            <label className="text-gray-400">Tyre</label>
+            <label className="text-zinc-500 uppercase text-xs tracking-[0.2em]">
+              Tyre Compound
+            </label>
+
             <select
-              className="w-full bg-zinc-900 p-2 mt-1"
+              className="w-full bg-zinc-900 border border-zinc-800 p-3 mt-2 rounded-xl"
+              value={compound}
               onChange={(e) => setCompound(e.target.value)}
             >
               <option>SOFT</option>
@@ -76,7 +123,11 @@ export default function Dashboard() {
           </div>
 
           <div>
-            <label className="text-gray-400">Tyre Age: {tyreAge}</label>
+            <div className="flex justify-between text-xs uppercase tracking-[0.2em] text-zinc-500 mb-2">
+              <span>Tyre Age</span>
+              <span>{tyreAge}</span>
+            </div>
+
             <input
               type="range"
               min="1"
@@ -88,7 +139,11 @@ export default function Dashboard() {
           </div>
 
           <div>
-            <label className="text-gray-400">Gap Ahead: {gapAhead}s</label>
+            <div className="flex justify-between text-xs uppercase tracking-[0.2em] text-zinc-500 mb-2">
+              <span>Gap Ahead</span>
+              <span>{gapAhead}s</span>
+            </div>
+
             <input
               type="range"
               min="0"
@@ -100,7 +155,11 @@ export default function Dashboard() {
           </div>
 
           <div>
-            <label className="text-gray-400">Gap Behind: {gapBehind}s</label>
+            <div className="flex justify-between text-xs uppercase tracking-[0.2em] text-zinc-500 mb-2">
+              <span>Gap Behind</span>
+              <span>{gapBehind}s</span>
+            </div>
+
             <input
               type="range"
               min="0"
@@ -115,77 +174,77 @@ export default function Dashboard() {
       </div>
 
       {/* CENTER PANEL */}
-      <div className="w-2/4 p-6">
+      <div className="w-[56%] p-6">
 
-        <h1 className="text-2xl font-bold mb-6 tracking-wide">
-          STRATEGY CONTROL
-        </h1>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="telemetry-card gradient-border p-6 red-glow mb-6"
+        >
 
-        {/* STRATEGY CARD */}
-        {result && (
-          <div className="bg-zinc-900 p-6 mb-6 border border-zinc-800">
+          <div className="flex items-center justify-between mb-6">
 
-            <h2 className="text-sm text-gray-400 mb-2">
-              DECISION
-            </h2>
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-zinc-500">
+                Current Decision
+              </p>
 
-            <p className={`text-2xl font-bold ${
-              result.action.includes("PIT")
-                ? "text-red-500"
-                : "text-green-400"
-            }`}>
-              {result.action}
-            </p>
-
-            <div className="mt-4">
-              <div className="text-sm text-gray-400">
-                Confidence
-              </div>
-
-              <div className="w-full bg-zinc-800 h-2 mt-1">
-                <div
-                  className="bg-green-400 h-2"
-                  style={{
-                    width: `${result.confidence * 100}%`,
-                  }}
-                />
-              </div>
+              <h1 className="text-5xl font-black mt-3 text-red-500">
+                {result?.action || "LOADING"}
+              </h1>
             </div>
 
-            <p className="text-gray-500 text-sm mt-4">
-              {result.reasoning}
-            </p>
+            <div className="text-right">
+              <p className="text-xs text-zinc-500 uppercase tracking-[0.2em]">
+                Confidence
+              </p>
+
+              <h2 className="text-4xl font-bold mt-2">
+                {result ? `${Math.round(result.confidence * 100)}%` : "--"}
+              </h2>
+            </div>
 
           </div>
-        )}
 
-        {/* SIMULATION */}
-        {sim && (
-          <div className="bg-zinc-900 p-6 border border-zinc-800">
+          <p className="text-zinc-400 leading-7 text-sm">
+            {result?.reasoning}
+          </p>
 
-            <h2 className="text-sm text-gray-400 mb-4">
-              SIMULATION
-            </h2>
+        </motion.div>
 
-            <div className="grid grid-cols-3 gap-4 text-center">
+        <TelemetryChart />
 
-              <div>
-                <p className="text-xs text-gray-400">Stay</p>
-                <p className="text-lg">{sim.stay_out_loss}s</p>
-              </div>
+        {simData && (
+          <div className="grid grid-cols-3 gap-4 mt-6">
 
-              <div>
-                <p className="text-xs text-gray-400">Pit</p>
-                <p className="text-lg">{sim.pit_loss}s</p>
-              </div>
+            <div className="telemetry-card p-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 mb-2">
+                Stay Out
+              </p>
 
-              <div>
-                <p className="text-xs text-gray-400">Undercut</p>
-                <p className="text-lg">
-                  {sim.undercut_possible ? "YES" : "NO"}
-                </p>
-              </div>
+              <h2 className="text-3xl font-bold">
+                {simData.stay_out_loss}s
+              </h2>
+            </div>
 
+            <div className="telemetry-card p-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 mb-2">
+                Pit Loss
+              </p>
+
+              <h2 className="text-3xl font-bold text-red-500">
+                {simData.pit_loss}s
+              </h2>
+            </div>
+
+            <div className="telemetry-card p-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-zinc-500 mb-2">
+                Undercut
+              </p>
+
+              <h2 className="text-3xl font-bold text-green-400">
+                {simData.undercut_possible ? "YES" : "NO"}
+              </h2>
             </div>
 
           </div>
@@ -193,15 +252,9 @@ export default function Dashboard() {
 
       </div>
 
-      {/* RIGHT PANEL (AI COMING NEXT) */}
-      <div className="w-1/4 p-6 border-l border-zinc-800">
-        <h2 className="text-lg text-blue-400 mb-4">
-          AI ENGINEER
-        </h2>
-
-        <p className="text-gray-500 text-sm">
-          Chat integration coming next step.
-        </p>
+      {/* RIGHT PANEL */}
+      <div className="w-[22%] border-l panel-border p-6">
+        <AIInsights />
       </div>
 
     </main>

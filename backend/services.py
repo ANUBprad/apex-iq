@@ -14,7 +14,7 @@ def run_strategy(data):
         tyre_age=data.tyre_age,
         circuit=data.circuit,
         gap_ahead=data.gap_ahead,
-        gap_behind=data.gap_behind
+        gap_behind=data.gap_behind,
     )
 
     return {
@@ -24,25 +24,16 @@ def run_strategy(data):
     }
 
 def run_simulation(data):
-    try:
-        stay_loss = engine.simulate_stay_out(data.compound, data.tyre_age)
-        pit_loss = engine.simulate_pit(data.circuit)
+    sim = engine.simulate_strategy_options(
+        compound=data.compound,
+        tyre_age=data.tyre_age,
+        circuit=data.circuit,
+        gap_ahead=data.gap_ahead,
+    )
 
-        # simulate_undercut returns boolean → don't round
-        undercut_possible = engine.simulate_undercut(
-            data.compound,
-            data.tyre_age,
-            data.gap_ahead
-        )
-
-        return {
-            "stay_out_loss": round(float(stay_loss), 2),
-            "pit_loss": round(float(pit_loss), 2),
-            "undercut_possible": bool(undercut_possible)
-        }
-
-    except Exception as e:
-        print("SIMULATION ERROR:", e)
-        return {
-            "error": str(e)
-        }
+    return {
+        "stay_out_loss": sim["stay_out_loss"],
+        "pit_loss": sim["pit_loss"],
+        "undercut_gain": sim["undercut_gain"],
+        "undercut_possible": sim["undercut_gain"] > data.gap_ahead,
+    }

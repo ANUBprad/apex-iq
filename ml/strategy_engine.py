@@ -17,7 +17,7 @@ class StrategyEngine:
 
         self.tyre_model = joblib.load(model_path)
 
-    # 🔥 NEW: Circuit Data (centralized intelligence)
+
     def get_circuit_data(self, circuit):
         circuit_data = {
             "Bahrain": {"pit_loss": 20, "degradation": 1.1},
@@ -47,7 +47,7 @@ class StrategyEngine:
 
         return circuit_data.get(circuit, {"pit_loss": 20, "degradation": 1.0})
 
-    # 🔥 UPDATED: Now includes circuit impact
+
     def predict_degradation(self, compound, tyre_age, circuit="Bahrain", lap_number=10, track_temp=35, air_temp=25):
         compound_map = {
             "SOFT": 0,
@@ -72,7 +72,7 @@ class StrategyEngine:
 
         return base_pred * degradation_factor
 
-    # 🔥 UPDATED
+
     def simulate_stay_out(self, compound, tyre_age, circuit, laps_to_sim=5):
         total_loss = 0
 
@@ -82,7 +82,6 @@ class StrategyEngine:
 
         return total_loss
 
-    # 🔥 UPDATED
     def simulate_pit(self, circuit, new_compound="MEDIUM", laps_to_sim=5):
         circuit_data = self.get_circuit_data(circuit)
         pit_loss = circuit_data["pit_loss"]
@@ -95,7 +94,6 @@ class StrategyEngine:
 
         return total_loss
 
-    # 🔥 UPDATED
     def simulate_undercut(self, compound, tyre_age, circuit, gap_ahead, opponent_pit_lap=2):
         gain = 0
 
@@ -106,7 +104,7 @@ class StrategyEngine:
 
         return gain > gap_ahead, gain
 
-    # 🔥 UPDATED
+
     def simulate_strategy_options(self, compound, tyre_age, circuit, gap_ahead):
         stay_loss = self.simulate_stay_out(compound, tyre_age, circuit)
         pit_loss = self.simulate_pit(circuit)
@@ -124,7 +122,7 @@ class StrategyEngine:
             "gap_ahead": gap_ahead
         }
 
-    # 🔥 UPDATED CORE LOGIC
+    # CORE LOGIC
     def decide(self, compound, tyre_age, circuit="Bahrain", gap_ahead=5, gap_behind=25):
         stay_loss = self.simulate_stay_out(compound, tyre_age, circuit)
         pit_loss = self.simulate_pit(circuit)
