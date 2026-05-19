@@ -95,10 +95,10 @@ export function TelemetryPreview() {
                     <XAxis dataKey="lap" stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} axisLine={false} />
                     <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} axisLine={false} />
                     <Tooltip
-                      contentStyle={{ background: "rgba(10,10,10,0.95)", border: "1px solid rgba(255,30,30,0.3)", borderRadius: 6, fontFamily: "Rajdhani", fontSize: 12 }}
-                      labelStyle={{ color: "#fff", fontFamily: "Orbitron", fontSize: 10, letterSpacing: "0.1em" }}
+                      contentStyle={{ background: "rgba(10,10,10,0.95)", border: "1px solid rgba(255,30,30,0.3)", borderRadius: 6, fontFamily: "'IBM Plex Mono', monospace", fontSize: 12 }}
+                      labelStyle={{ color: "#fff", fontFamily: "'Share Tech Mono', monospace", fontSize: 10, letterSpacing: "0.1em" }}
                     />
-                    <ReferenceLine y={50} stroke="rgba(255,30,30,0.25)" strokeDasharray="3 3" label={{ value: "CLIFF", fill: "rgba(255,30,30,0.6)", fontSize: 9, fontFamily: "Orbitron", position: "insideTopRight" }} />
+                    <ReferenceLine y={50} stroke="rgba(255,30,30,0.25)" strokeDasharray="3 3" label={{ value: "CLIFF", fill: "rgba(255,30,30,0.6)", fontSize: 9, fontFamily: "'Share Tech Mono', monospace", position: "insideTopRight" }} />
                     <Area type="monotone" dataKey="soft" stroke="oklch(0.62 0.25 27)" strokeWidth={2} fill="url(#g-soft)" animationDuration={1600} />
                     <Area type="monotone" dataKey="medium" stroke="oklch(0.85 0.18 90)" strokeWidth={1.5} fill="url(#g-med)" animationDuration={1800} />
                     <Area type="monotone" dataKey="hard" stroke="rgba(255,255,255,0.7)" strokeWidth={1.5} fill="url(#g-hard)" animationDuration={2000} />

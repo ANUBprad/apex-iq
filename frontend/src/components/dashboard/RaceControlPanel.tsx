@@ -3,26 +3,14 @@ import { motion } from "framer-motion";
 import { Loader2, Zap } from "lucide-react";
 import { CIRCUITS, COMPOUNDS, type CompoundId } from "@/lib/apex-data";
 import { GlowButton } from "@/components/ui-apex/GlowButton";
+import { ApexSlider } from "@/components/ui-apex/ApexSlider";
+import { ApexSelect } from "@/components/ui-apex/ApexSelect";
+import { ApexToggle } from "@/components/ui-apex/ApexToggle";
+import { ApexCheckbox } from "@/components/ui-apex/ApexCheckbox";
 
 interface Props {
   onRun: () => void;
   loading: boolean;
-}
-
-function Slider({ label, value, setValue, min, max, suffix, step = 1 }: { label: string; value: number; setValue: (n: number) => void; min: number; max: number; suffix?: string; step?: number; }) {
-  const pct = ((value - min) / (max - min)) * 100;
-  return (
-    <div>
-      <div className="flex justify-between mb-1.5">
-        <label className="font-space-grotesk text-[10px] tracking-[0.2em] text-white/50 uppercase">{label}</label>
-        <span className="font-rajdhani font-bold text-apex-red text-sm">{value}{suffix}</span>
-      </div>
-      <div className="relative h-1.5 rounded-full bg-white/10 overflow-hidden">
-        <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-apex-red-dim to-apex-red shadow-[0_0_10px_rgba(255,30,30,0.6)]" style={{ width: `${pct}%` }} />
-      </div>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => setValue(+e.target.value)} className="w-full -mt-1.5 opacity-0 cursor-pointer h-3" />
-    </div>
-  );
 }
 
 export function RaceControlPanel({ onRun, loading }: Props) {
@@ -35,6 +23,8 @@ export function RaceControlPanel({ onRun, loading }: Props) {
   const [scProb, setScProb] = useState(35);
   const [rainProb, setRainProb] = useState(15);
   const [trackTemp, setTrackTemp] = useState(38);
+  const [ersEnabled, setErsEnabled] = useState(false);
+  const [drsEnabled, setDrsEnabled] = useState(false);
 
   return (
     <aside className="apex-glass rounded-lg p-5 h-full overflow-y-auto relative">
@@ -45,11 +35,11 @@ export function RaceControlPanel({ onRun, loading }: Props) {
 
       <div className="space-y-5">
         <div>
-          <label className="font-space-grotesk text-[10px] tracking-[0.2em] text-white/50 uppercase block mb-1.5">Circuit</label>
+          <label className="font-rajdhani text-xs uppercase text-green-telemetry mb-2 block">Circuit</label>
           <select
             value={circuit}
             onChange={(e) => setCircuit(e.target.value)}
-            className="w-full bg-black/60 border border-apex-red/20 rounded-md px-3 py-2.5 font-rajdhani font-bold text-white focus:border-apex-red focus:outline-none focus:shadow-[0_0_15px_rgba(255,30,30,0.3)] transition-all"
+            className="w-full bg-bg-base border border-border-subtle rounded-sm px-3 py-2.5 font-rajdhani font-bold text-white focus:border-cyan-electric focus:outline-none focus:shadow-[0_0_8px_rgba(0,217,255,0.2)] transition-all"
           >
             {CIRCUITS.map((c) => (
               <option key={c.name} value={c.name} className="bg-black">{c.flag} {c.name}</option>
@@ -57,35 +47,27 @@ export function RaceControlPanel({ onRun, loading }: Props) {
           </select>
         </div>
 
-        <div>
-          <label className="font-space-grotesk text-[10px] tracking-[0.2em] text-white/50 uppercase block mb-2">Compound</label>
-          <div className="flex gap-1.5">
-            {COMPOUNDS.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => setCompound(c.id)}
-                className={`flex-1 py-2 rounded-md font-rajdhani font-bold text-[11px] tracking-wider transition-all ${
-                  compound === c.id
-                    ? "text-black shadow-[0_0_15px_rgba(255,30,30,0.4)]"
-                    : "bg-white/5 text-white/60 hover:bg-white/10 border border-white/10"
-                }`}
-                style={compound === c.id ? { background: c.color } : {}}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
+        <ApexSelect
+          label="Compound"
+          options={COMPOUNDS.map((c) => ({ value: c.id, label: c.label, color: c.color }))}
+          value={compound}
+          onChange={(v) => setCompound(v as CompoundId)}
+        />
+
+        <ApexSlider label="Tyre Age" value={tyreAge} onChange={setTyreAge} min={0} max={50} suffix=" laps" accentColor="#DC143C" />
+        <ApexSlider label="Gap Ahead" value={gapAhead} onChange={setGapAhead} min={0} max={30} suffix="s" accentColor="#DC143C" />
+        <ApexSlider label="Gap Behind" value={gapBehind} onChange={setGapBehind} min={0} max={30} suffix="s" accentColor="#DC143C" />
+        <ApexSlider label="Fuel Load" value={fuel} onChange={setFuel} min={0} max={110} suffix="kg" accentColor="#DC143C" />
+
+        <div className="border-t border-border-subtle pt-5 space-y-5">
+          <ApexSlider label="Safety Car Probability" value={scProb} onChange={setScProb} min={0} max={100} suffix="%" accentColor="#DC143C" />
+          <ApexSlider label="Rain Probability" value={rainProb} onChange={setRainProb} min={0} max={100} suffix="%" accentColor="#DC143C" />
+          <ApexSlider label="Track Temperature" value={trackTemp} onChange={setTrackTemp} min={20} max={60} suffix="°C" accentColor="#DC143C" />
         </div>
 
-        <Slider label="Tyre Age" value={tyreAge} setValue={setTyreAge} min={0} max={50} suffix=" laps" />
-        <Slider label="Gap Ahead" value={gapAhead} setValue={setGapAhead} min={0} max={30} suffix="s" />
-        <Slider label="Gap Behind" value={gapBehind} setValue={setGapBehind} min={0} max={30} suffix="s" />
-        <Slider label="Fuel Load" value={fuel} setValue={setFuel} min={0} max={110} suffix="kg" />
-
-        <div className="border-t border-white/5 pt-5 space-y-5">
-          <Slider label="Safety Car Probability" value={scProb} setValue={setScProb} min={0} max={100} suffix="%" />
-          <Slider label="Rain Probability" value={rainProb} setValue={setRainProb} min={0} max={100} suffix="%" />
-          <Slider label="Track Temperature" value={trackTemp} setValue={setTrackTemp} min={20} max={60} suffix="°C" />
+        <div className="border-t border-border-subtle pt-5 space-y-4">
+          <ApexToggle label="ERS Strategy" enabled={ersEnabled} onChange={setErsEnabled} />
+          <ApexCheckbox label="Enable DRS" checked={drsEnabled} onChange={setDrsEnabled} />
         </div>
 
         <motion.div whileTap={{ scale: 0.98 }}>

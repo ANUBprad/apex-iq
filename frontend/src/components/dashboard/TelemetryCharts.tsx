@@ -7,7 +7,7 @@ import {
 import { useMemo } from "react";
 import { genDegCurve, genPaceDelta, genPitWindow, genUndercut, genFuel, genSector } from "@/lib/apex-data";
 
-const tipStyle = { background: "rgba(10,10,10,0.95)", border: "1px solid rgba(255,30,30,0.3)", borderRadius: 6, fontFamily: "Rajdhani", fontSize: 12 };
+const tipStyle = { background: "rgba(10,10,10,0.95)", border: "1px solid rgba(255,30,30,0.3)", borderRadius: 6, fontFamily: "'IBM Plex Mono', monospace", fontSize: 12 };
 
 function ChartFrame({ title, children, delay = 0 }: { title: string; children: React.ReactNode; delay?: number }) {
   return (
@@ -112,7 +112,7 @@ export function TelemetryCharts({ seed }: { seed: number }) {
         <ResponsiveContainer>
           <RadarChart data={sector}>
             <PolarGrid stroke="rgba(255,255,255,0.15)" />
-            <PolarAngleAxis dataKey="axis" stroke="rgba(255,255,255,0.6)" tick={{ fontSize: 11, fontFamily: "Orbitron" }} />
+            <PolarAngleAxis dataKey="axis" stroke="rgba(255,255,255,0.6)" tick={{ fontSize: 11, fontFamily: "'Share Tech Mono', monospace" }} />
             <PolarRadiusAxis stroke="rgba(255,255,255,0.2)" tick={false} />
             <Radar dataKey="optimal" stroke="oklch(0.82 0.15 215)" fill="oklch(0.82 0.15 215)" fillOpacity={0.15} animationDuration={1500} />
             <Radar dataKey="current" stroke="oklch(0.62 0.25 27)" fill="oklch(0.62 0.25 27)" fillOpacity={0.35} animationDuration={1700} />

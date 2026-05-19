@@ -71,3 +71,61 @@ export const STRATEGIES = [
   { action: "UNDERCUT", confidence: 0.81, reasoning: "Fresh medium compound projected to gain 1.8s over rivals across the next 5 laps. Execute now." },
   { action: "OVERCUT", confidence: 0.68, reasoning: "Cooler track temps and clean air ahead — extending the stint beats pitting into traffic by 2.4s." },
 ];
+
+// Tyre status data generators
+export interface TyreStatusData {
+  position: string;
+  compound: "soft" | "medium" | "hard";
+  temperature: number;
+  wear: number;
+  frontTemp: number;
+  centerTemp: number;
+  rearTemp: number;
+}
+
+export const TYRE_STATUS: TyreStatusData[] = [
+  { position: "FL", compound: "medium", temperature: 87, wear: 65, frontTemp: 85, centerTemp: 87, rearTemp: 89 },
+  { position: "FR", compound: "medium", temperature: 89, wear: 63, frontTemp: 88, centerTemp: 89, rearTemp: 90 },
+  { position: "RL", compound: "medium", temperature: 92, wear: 68, frontTemp: 91, centerTemp: 92, rearTemp: 93 },
+  { position: "RR", compound: "medium", temperature: 94, wear: 70, frontTemp: 93, centerTemp: 94, rearTemp: 95 },
+];
+
+export function genTyreStatus(seed = Math.random()): TyreStatusData[] {
+  const baseTemp = 80 + seed * 15;
+  const baseWear = 40 + seed * 35;
+  return [
+    { position: "FL", compound: "medium", temperature: Math.round(baseTemp + 1), wear: Math.round(baseWear + 2), frontTemp: Math.round(baseTemp - 1), centerTemp: Math.round(baseTemp + 1), rearTemp: Math.round(baseTemp + 3) },
+    { position: "FR", compound: "medium", temperature: Math.round(baseTemp + 3), wear: Math.round(baseWear), frontTemp: Math.round(baseTemp + 2), centerTemp: Math.round(baseTemp + 3), rearTemp: Math.round(baseTemp + 4) },
+    { position: "RL", compound: "medium", temperature: Math.round(baseTemp + 6), wear: Math.round(baseWear + 5), frontTemp: Math.round(baseTemp + 5), centerTemp: Math.round(baseTemp + 6), rearTemp: Math.round(baseTemp + 7) },
+    { position: "RR", compound: "medium", temperature: Math.round(baseTemp + 8), wear: Math.round(baseWear + 7), frontTemp: Math.round(baseTemp + 7), centerTemp: Math.round(baseTemp + 8), rearTemp: Math.round(baseTemp + 9) },
+  ];
+}
+
+// Live telemetry stream data generator
+export interface TelemetryDataPoint {
+  time: number;
+  speed: number;
+  throttle: number;
+  brake: number;
+  gear: number;
+}
+
+export function genTelemetryStream(points = 120): TelemetryDataPoint[] {
+  return Array.from({ length: points }, (_, i) => {
+    const t = i;
+    // Simulate a lap-like pattern
+    const phase = (t % 30) / 30; // 0-1 within a 30s segment
+    const speedBase = 200 + Math.sin(phase * Math.PI * 2) * 80;
+    const throttleBase = phase < 0.7 ? 80 + Math.random() * 20 : Math.random() * 30;
+    const brakeBase = phase > 0.7 && phase < 0.85 ? 60 + Math.random() * 40 : Math.random() * 5;
+    const gearBase = Math.max(1, Math.min(8, Math.round(3 + Math.sin(phase * Math.PI) * 4)));
+
+    return {
+      time: t,
+      speed: Math.round(speedBase + (Math.random() - 0.5) * 10),
+      throttle: Math.round(Math.max(0, Math.min(100, throttleBase))),
+      brake: Math.round(Math.max(0, Math.min(100, brakeBase))),
+      gear: gearBase,
+    };
+  });
+}
