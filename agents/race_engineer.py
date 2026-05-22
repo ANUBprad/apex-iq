@@ -44,3 +44,17 @@ class RaceEngineer:
         briefing = ("RACE ENGINEER BRIEFING\n\n" + "\n".join(reasoning_parts) + f"\n\nRecommended Action: {action}" + f"\nConfidence: {int(confidence * 100)}%")
 
         return briefing
+    
+    def explain_strategy_ranking(self, strategy_result):
+        recommended = (strategy_result["recommended"])
+        confidence = (strategy_result["strategy_confidence"])
+        advantage = (strategy_result["expected_advantage"])
+        risk = (strategy_result["strategy_risk"])
+
+        return (
+            f"Strategy simulation completed. "
+            f"{recommended} is projected to be the fastest approach. "
+            f"Expected advantage: {advantage:.2f}s. "
+            f"Confidence level: {confidence}%. "
+            f"Overall strategy risk: {risk}."
+        )

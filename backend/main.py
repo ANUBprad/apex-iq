@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from backend.schemas import StrategyInput
 from backend.services import run_strategy, run_simulation
 from fastapi.middleware.cors import CORSMiddleware
+from backend.services import run_strategy_comparison
 
 app = FastAPI(
     title="F1 AI Race Engineer API",
@@ -36,3 +37,8 @@ def get_strategy(data: StrategyInput):
 @app.post("/simulate")
 def simulate(data: StrategyInput):
     return run_simulation(data)
+
+@app.post("/strategy-comparison")
+def strategy_comparison(data: StrategyInput):
+
+    return run_strategy_comparison(data)
