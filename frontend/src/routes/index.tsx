@@ -2,16 +2,20 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/landing/Hero";
-import { Capabilities } from "@/components/landing/Capabilities";
+import { Problem } from "@/components/landing/Problem";
+import { StrategyIntelligence } from "@/components/landing/StrategyIntelligence";
+import { TelemetryIntelligence } from "@/components/landing/TelemetryIntelligence";
+import { SimulationEngine } from "@/components/landing/SimulationEngine";
+import { AIRaceEngineer } from "@/components/landing/AIRaceEngineer";
 import { CircuitIntelligence } from "@/components/landing/CircuitIntelligence";
-import { TelemetryPreview } from "@/components/landing/TelemetryPreview";
+import { CTASection } from "@/components/landing/CTASection";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
   head: () => ({
     meta: [
       { title: "APEXiq · AI Race Strategy Intelligence" },
-      { name: "description", content: "AI-powered Formula 1 race strategy intelligence platform — real-time telemetry, tyre degradation prediction, and pit strategy optimization." },
+      { name: "description", content: "AI-powered Formula 1 race strategy intelligence platform -- real-time telemetry, tyre degradation prediction, and pit strategy optimization." },
     ],
   }),
 });
@@ -22,9 +26,13 @@ function LandingPage() {
       <Navbar />
       <main>
         <Hero />
-        <Capabilities />
+        <Problem />
+        <StrategyIntelligence />
+        <TelemetryIntelligence />
+        <SimulationEngine />
+        <AIRaceEngineer />
         <CircuitIntelligence />
-        <TelemetryPreview />
+        <CTASection />
       </main>
       <Footer />
     </div>

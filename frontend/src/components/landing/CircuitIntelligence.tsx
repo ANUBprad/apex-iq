@@ -1,156 +1,114 @@
 import { motion } from "framer-motion";
 import { CIRCUITS } from "@/lib/apex-data";
 
-const DEG_META: Record<string, { color: string; pulse: string }> = {
-  Low: { color: "text-green-telemetry", pulse: "bg-green-telemetry" },
-  Medium: { color: "text-amber-400", pulse: "bg-amber-400" },
-  High: { color: "text-red-ferrari", pulse: "bg-red-ferrari" },
-};
-
-function CircuitCard({ c, i }: { c: (typeof CIRCUITS)[number]; i: number }) {
-  const deg = DEG_META[c.deg] ?? DEG_META.Medium;
-
+function CircuitMapMark() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ delay: i * 0.05, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative rounded-lg border border-border-subtle bg-bg-elevated overflow-hidden cursor-pointer transition-colors hover:border-border-visible"
-    >
-      {/* Top hairline */}
-      <div className="pointer-events-none absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-electric/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-      {/* Bottom hairline */}
-      <div className="pointer-events-none absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-red-ferrari/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-      {/* Scan line on hover */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <div className="scan-line" />
-      </div>
-
-      <div className="relative p-4">
-        {/* Header row */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-base">{c.flag}</span>
-            <span className="font-rajdhani font-semibold text-text-primary text-sm tracking-wide">
-              {c.name}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-sm border border-border-subtle bg-bg-base">
-            <span className={`w-1 h-1 rounded-full ${deg.pulse} pulse-dot`} />
-            <span
-              className={`font-mono text-[9px] tracking-[0.2em] uppercase ${deg.color}`}
-            >
-              {c.deg}
-            </span>
-          </div>
-        </div>
-
-        {/* Data row */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-sm bg-bg-base border border-border-subtle px-3 py-2">
-            <div className="font-mono text-[8px] tracking-[0.25em] text-text-tertiary uppercase mb-0.5">
-              PIT_LOSS
-            </div>
-            <div className="font-orbitron font-bold text-cyan-electric text-lg tabular-nums leading-none">
-              {c.pitLoss}
-              <span className="text-xs text-text-tertiary ml-0.5">s</span>
-            </div>
-          </div>
-          <div className="rounded-sm bg-bg-base border border-border-subtle px-3 py-2">
-            <div className="font-mono text-[8px] tracking-[0.25em] text-text-tertiary uppercase mb-0.5">
-              DEG_INDEX
-            </div>
-            <div
-              className={`font-orbitron font-bold text-lg tabular-nums leading-none ${deg.color}`}
-            >
-              {c.deg === "High" ? "0.87" : c.deg === "Medium" ? "0.54" : "0.21"}
-            </div>
-          </div>
-        </div>
-
-        {/* Status bar */}
-        <div className="mt-3 flex items-center gap-2">
-          <div className="flex-1 h-[2px] bg-bg-base rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full ${
-                c.deg === "High"
-                  ? "bg-red-ferrari"
-                  : c.deg === "Medium"
-                    ? "bg-amber-400"
-                    : "bg-green-telemetry"
-              }`}
-              style={{
-                width:
-                  c.deg === "High" ? "87%" : c.deg === "Medium" ? "54%" : "21%",
-              }}
-            />
-          </div>
-          <span className="font-mono text-[8px] tracking-[0.15em] text-text-tertiary">
-            CALIBRATED
-          </span>
-        </div>
-      </div>
-    </motion.div>
+    <svg viewBox="0 0 120 80" className="w-full h-full">
+      <path
+        d="M18 52 C26 30, 46 22, 60 28 C74 34, 76 18, 92 20 C104 22, 108 38, 100 48 C92 58, 76 58, 70 66 C62 74, 42 72, 32 64 C24 58, 20 58, 18 52 Z"
+        fill="none"
+        stroke="rgba(0,217,255,0.65)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M24 53 C31 36, 47 30, 59 34 C71 38, 76 24, 90 26 C100 28, 102 40, 96 47 C88 56, 74 56, 67 63 C59 70, 44 68, 35 62 C28 57, 25 57, 24 53 Z"
+        fill="none"
+        stroke="rgba(220,20,60,0.35)"
+        strokeWidth="1.4"
+        strokeDasharray="5 6"
+      />
+    </svg>
   );
 }
 
 export function CircuitIntelligence() {
   return (
-    <section className="relative py-24 px-6 overflow-hidden">
-      {/* Background layers */}
-      <div className="absolute inset-0 apex-grid-bg opacity-[0.025]" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full bg-cyan-electric/5 blur-[120px]" />
-
-      <div className="relative max-w-6xl mx-auto">
-        {/* Section header */}
+    <section className="py-20 md:py-28">
+      <div className="max-w-[1200px] mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mb-12"
+          transition={{ duration: 0.5 }}
+          className="mb-8"
         >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-sm border border-cyan-electric/20 bg-cyan-electric/5">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-electric pulse-dot" />
-              <span className="font-mono text-[10px] tracking-[0.35em] text-cyan-electric uppercase">
-                Circuit Intelligence
-              </span>
-            </div>
+          <div className="font-rajdhani text-[12px] tracking-[0.22em] uppercase text-cyan-electric/80 mb-2">
+            Circuit Intelligence
           </div>
-          <h2 className="font-orbitron font-bold text-3xl md:text-5xl text-white tracking-wider leading-[1.05]">
-            20+ Calibrated{" "}
-            <span className="text-cyan-electric">Circuits</span>
+          <h2 className="font-grotesk font-semibold text-[28px] md:text-[40px] text-foreground tracking-[-0.03em] leading-[1.05]">
+            Interactive circuit database
           </h2>
-          <p className="mt-4 font-inter text-sm md:text-base text-text-secondary max-w-xl leading-relaxed">
-            Per-circuit calibration models — pit loss deltas, degradation
-            indices, and surface grip profiles tuned from thousands of laps of
-            historical telemetry.
+          <p className="mt-4 text-[14px] md:text-[15px] text-muted-foreground leading-[1.8] max-w-2xl">
+            Explore pit loss, degradation characteristics, and strategy tendencies by track — designed for fast scanning and deeper dives.
           </p>
         </motion.div>
+      </div>
 
-        {/* Circuit grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {CIRCUITS.map((c, i) => (
-            <CircuitCard key={c.name} c={c} i={i} />
-          ))}
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {CIRCUITS.slice(0, 12).map((c, i) => {
+            const overtake =
+              c.deg === "High" ? "Hard" : c.deg === "Low" ? "Very Hard" : "Medium";
+            return (
+              <motion.button
+                type="button"
+                key={c.name}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.02, duration: 0.45 }}
+                className="text-left rounded-lg border border-border bg-card/60 backdrop-blur p-5 hover:bg-card/80 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-muted-foreground">
+                      {c.flag} · {c.laps} LAPS
+                    </div>
+                    <div className="mt-2 font-grotesk text-[16px] font-semibold text-foreground">{c.name}</div>
+                  </div>
+                  <div className="h-12 w-20 rounded-md border border-border bg-background/40 overflow-hidden">
+                    <CircuitMapMark />
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div className="rounded-md border border-border bg-background/40 p-3">
+                    <div className="font-rajdhani text-[11px] tracking-[0.18em] uppercase text-muted-foreground">
+                      Pit Loss
+                    </div>
+                    <div className="mt-2 font-mono text-[13px] text-cyan-electric tabular-nums">{c.pitLoss.toFixed(1)}s</div>
+                  </div>
+                  <div className="rounded-md border border-border bg-background/40 p-3">
+                    <div className="font-rajdhani text-[11px] tracking-[0.18em] uppercase text-muted-foreground">
+                      Tyre Stress
+                    </div>
+                    <div
+                      className={[
+                        "mt-2 font-mono text-[13px] tabular-nums",
+                        c.deg === "High" ? "text-red-ferrari" : c.deg === "Low" ? "text-green-telemetry" : "text-cyan-electric",
+                      ].join(" ")}
+                    >
+                      {c.deg}
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-border bg-background/40 p-3">
+                    <div className="font-rajdhani text-[11px] tracking-[0.18em] uppercase text-muted-foreground">
+                      Deg Rate
+                    </div>
+                    <div className="mt-2 font-mono text-[13px] text-foreground tabular-nums">{c.degRate.toFixed(2)} s/lap</div>
+                  </div>
+                  <div className="rounded-md border border-border bg-background/40 p-3">
+                    <div className="font-rajdhani text-[11px] tracking-[0.18em] uppercase text-muted-foreground">
+                      Overtake
+                    </div>
+                    <div className="mt-2 font-mono text-[13px] text-muted-foreground tabular-nums">{overtake}</div>
+                  </div>
+                </div>
+              </motion.button>
+            );
+          })}
         </div>
-
-        {/* Bottom terminal line */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="mt-8 flex items-center gap-3 px-4 py-2.5 rounded-sm border border-border-subtle bg-bg-elevated"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-green-telemetry pulse-dot" />
-          <span className="font-mono text-[10px] tracking-[0.2em] text-text-tertiary uppercase">
-            All systems nominal · {CIRCUITS.length} circuits loaded · Model v4.0
-          </span>
-        </motion.div>
       </div>
     </section>
   );

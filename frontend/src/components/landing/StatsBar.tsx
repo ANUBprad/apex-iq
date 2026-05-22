@@ -40,29 +40,29 @@ function AnimatedStat({
     decimals > 0 ? display.toFixed(decimals) : Math.round(display).toString();
 
   return (
-    <span ref={ref} className="font-orbitron font-black text-3xl md:text-4xl text-white tabular-nums">
+    <span ref={ref} className="font-mono font-bold text-[28px] md:text-[36px] text-[#1A1D29] tabular-nums">
       {prefix}
       {formatted}
-      <span className="text-apex-red">{suffix}</span>
+      <span className="text-[#0EA5E9]">{suffix}</span>
     </span>
   );
 }
 
 export function StatsBar() {
   return (
-    <section className="relative border-y border-white/5 bg-black/40 backdrop-blur-sm">
+    <section className="border-y border-[#E5E7EB] bg-[#F8F9FB]">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
-        className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8"
+        transition={{ duration: 0.5 }}
+        className="max-w-[1200px] mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8"
       >
         {STATS.map((s) => (
           <motion.div
             key={s.label}
             whileHover={{ y: -2 }}
-            className="text-center group"
+            className="text-center"
           >
             <AnimatedStat
               value={s.value}
@@ -70,7 +70,7 @@ export function StatsBar() {
               prefix={s.prefix}
               decimals={s.decimals}
             />
-            <div className="mt-2 font-space-grotesk text-[10px] tracking-[0.25em] text-white/45 uppercase group-hover:text-apex-red/80 transition-colors">
+            <div className="mt-2 text-[12px] font-semibold text-[#6B7280] uppercase tracking-[0.5px]">
               {s.label}
             </div>
           </motion.div>

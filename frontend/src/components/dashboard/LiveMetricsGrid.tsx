@@ -1,52 +1,99 @@
 import { motion } from "framer-motion";
-import { useMemo } from "react";
+import type { Strategy, SimulationData } from "@/hooks/useStrategy";
 
-const METRICS = [
-  { label: "Predicted Lap", unit: "s", base: 78.4, range: 0.3, status: "ok" },
-  { label: "Tyre Wear", unit: "%", base: 32, range: 8, status: "warn" },
-  { label: "Fuel Remaining", unit: "kg", base: 64, range: 4, status: "ok" },
-  { label: "Pit Delta", unit: "s", base: 21.4, range: 0.4, status: "ok" },
-  { label: "Track Evolution", unit: "%", base: 14, range: 3, status: "ok" },
-  { label: "DRS Efficiency", unit: "%", base: 92, range: 4, status: "ok" },
-  { label: "Pace Drop-off", unit: "s/lap", base: 0.18, range: 0.05, status: "warn" },
-  { label: "Undercut Gain", unit: "s", base: 1.8, range: 0.3, status: "good" },
-] as const;
-
-const STATUS = {
-  good: "oklch(0.85 0.22 155)",
-  ok: "oklch(0.82 0.15 215)",
-  warn: "oklch(0.78 0.18 60)",
-  crit: "oklch(0.62 0.25 27)",
+const STATUS_COLORS = {
+  good: "#10B981",
+  ok: "#0EA5E9",
+  warn: "#F59E0B",
+  crit: "#EF4444",
 } as const;
 
-export function LiveMetricsGrid({ seed }: { seed: number }) {
-  const values = useMemo(() => METRICS.map((m) => +(m.base + (Math.random() - 0.5) * m.range).toFixed(2)), [seed]);
+interface MetricItem {
+  label: string;
+  unit: string;
+  getValue: (s: Strategy | null, sim: SimulationData | null) => { value: string; status: keyof typeof STATUS_COLORS } | null;
+}
+
+const METRICS: MetricItem[] = [
+  {
+    label: "Est. Gain",
+    unit: "s",
+    getValue: (_, sim) => sim ? { value: sim.undercutGain.toFixed(2), status: sim.undercutGain > 0 ? "good" : "warn" } : null,
+  },
+  {
+    label: "Pit Loss",
+    unit: "s",
+    getValue: (_, sim) => sim ? { value: sim.pitLoss.toFixed(1), status: sim.pitLoss > 25 ? "crit" : sim.pitLoss > 20 ? "warn" : "ok" } : null,
+  },
+  {
+    label: "Stay Out Loss",
+    unit: "s",
+    getValue: (_, sim) => sim ? { value: sim.stayOutLoss.toFixed(2), status: sim.stayOutLoss > 3 ? "warn" : "ok" } : null,
+  },
+  {
+    label: "Undercut",
+    unit: "",
+    getValue: (_, sim) => sim ? { value: sim.undercutPossible ? "OPEN" : "CLOSED", status: sim.undercutPossible ? "good" : "crit" } : null,
+  },
+  {
+    label: "Confidence",
+    unit: "%",
+    getValue: (s) => s ? { value: Math.round(s.confidence * 100).toString(), status: s.confidence > 0.7 ? "good" : s.confidence > 0.4 ? "ok" : "warn" } : null,
+  },
+  {
+    label: "Risk Level",
+    unit: "",
+    getValue: (s) => s ? { value: s.riskLevel, status: s.riskLevel === "LOW" ? "good" : s.riskLevel === "MEDIUM" ? "warn" : "crit" } : null,
+  },
+  {
+    label: "Pit Window",
+    unit: "",
+    getValue: (s) => s ? { value: s.pitWindow === "Not available" ? "N/A" : s.pitWindow, status: s.pitWindow !== "Not available" ? "ok" : "warn" } : null,
+  },
+  {
+    label: "Action",
+    unit: "",
+    getValue: (s) => s ? { value: s.action.length > 10 ? s.action.slice(0, 10) : s.action, status: s.confidence > 0.6 ? "good" : "warn" } : null,
+  },
+];
+
+export function LiveMetricsGrid({ strategy, simulation }: { strategy: Strategy | null; simulation: SimulationData | null }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-      {METRICS.map((m, i) => (
-        <motion.div
-          key={m.label}
-          initial={{ opacity: 0, scale: 0.94 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: i * 0.04, duration: 0.4 }}
-          whileHover={{ y: -3 }}
-          className="apex-glass rounded-md p-4 relative overflow-hidden"
-        >
-          <div className="flex items-center justify-between">
-            <span className="font-space-grotesk text-[9px] tracking-[0.2em] text-white/45 uppercase">{m.label}</span>
-            <span className="w-1.5 h-1.5 rounded-full pulse-dot" style={{ background: STATUS[m.status as keyof typeof STATUS] }} />
-          </div>
+      {METRICS.map((m, i) => {
+        const result = m.getValue(strategy, simulation);
+        return (
           <motion.div
-            key={values[i]}
-            initial={{ scale: 1.08, opacity: 0.6 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.4 }}
-            className="font-rajdhani font-bold text-3xl text-white mt-2"
+            key={m.label}
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.03, duration: 0.3 }}
+            className="bg-[#F8F9FB] border border-[#E5E7EB] rounded-lg p-3 shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
           >
-            {values[i]}<span className="text-sm text-white/50 ml-1">{m.unit}</span>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[12px] font-semibold text-[#6B7280] uppercase tracking-[0.5px]">{m.label}</span>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: result ? STATUS_COLORS[result.status] : "#D1D5DB" }} />
+            </div>
+            {result ? (
+              <motion.div
+                key={result.value}
+                initial={{ scale: 1.03, opacity: 0.5 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.2 }}
+                className="font-mono text-xl font-semibold text-[#1A1D29] tabular-nums leading-none"
+              >
+                {result.value}
+                {m.unit && <span className="text-[11px] text-[#9CA3AF] ml-1 font-inter font-medium">{m.unit}</span>}
+              </motion.div>
+            ) : (
+              <div className="font-mono text-xl font-semibold text-[#D1D5DB] leading-none">
+                --
+                {m.unit && <span className="text-[11px] text-[#E5E7EB] ml-1 font-inter font-medium">{m.unit}</span>}
+              </div>
+            )}
           </motion.div>
-        </motion.div>
-      ))}
+        );
+      })}
     </div>
   );
 }

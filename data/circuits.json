@@ -1,0 +1,141 @@
+{
+  "Bahrain": {
+    "pit_loss": 20,
+    "degradation_factor": 1.2,
+    "overtaking_difficulty": 3,
+    "safety_car_probability": 0.25
+  },
+
+  "Jeddah": {
+    "pit_loss": 19,
+    "degradation_factor": 0.9,
+    "overtaking_difficulty": 4,
+    "safety_car_probability": 0.55
+  },
+
+  "Melbourne": {
+    "pit_loss": 21,
+    "degradation_factor": 1.0,
+    "overtaking_difficulty": 5,
+    "safety_car_probability": 0.40
+  },
+
+  "Suzuka": {
+    "pit_loss": 21,
+    "degradation_factor": 1.1,
+    "overtaking_difficulty": 6,
+    "safety_car_probability": 0.30
+  },
+
+  "Shanghai": {
+    "pit_loss": 22,
+    "degradation_factor": 1.0,
+    "overtaking_difficulty": 4,
+    "safety_car_probability": 0.35
+  },
+
+  "Miami": {
+    "pit_loss": 20,
+    "degradation_factor": 1.1,
+    "overtaking_difficulty": 4,
+    "safety_car_probability": 0.35
+  },
+
+  "Imola": {
+    "pit_loss": 27,
+    "degradation_factor": 1.0,
+    "overtaking_difficulty": 8,
+    "safety_car_probability": 0.30
+  },
+
+  "Monaco": {
+    "pit_loss": 22,
+    "degradation_factor": 0.8,
+    "overtaking_difficulty": 10,
+    "safety_car_probability": 0.60
+  },
+
+  "Barcelona": {
+    "pit_loss": 22,
+    "degradation_factor": 1.1,
+    "overtaking_difficulty": 5,
+    "safety_car_probability": 0.20
+  },
+
+  "Montreal": {
+    "pit_loss": 19,
+    "degradation_factor": 1.0,
+    "overtaking_difficulty": 3,
+    "safety_car_probability": 0.50
+  },
+
+  "Silverstone": {
+    "pit_loss": 21,
+    "degradation_factor": 1.3,
+    "overtaking_difficulty": 4,
+    "safety_car_probability": 0.20
+  },
+
+  "Hungary": {
+    "pit_loss": 21,
+    "degradation_factor": 1.2,
+    "overtaking_difficulty": 9,
+    "safety_car_probability": 0.30
+  },
+
+  "Spa": {
+    "pit_loss": 18,
+    "degradation_factor": 1.0,
+    "overtaking_difficulty": 3,
+    "safety_car_probability": 0.35
+  },
+
+  "Monza": {
+    "pit_loss": 18,
+    "degradation_factor": 0.8,
+    "overtaking_difficulty": 2,
+    "safety_car_probability": 0.20
+  },
+
+  "Singapore": {
+    "pit_loss": 24,
+    "degradation_factor": 1.3,
+    "overtaking_difficulty": 9,
+    "safety_car_probability": 0.65
+  },
+
+  "Austin": {
+    "pit_loss": 20,
+    "degradation_factor": 1.0,
+    "overtaking_difficulty": 4,
+    "safety_car_probability": 0.30
+  },
+
+  "Mexico": {
+    "pit_loss": 19,
+    "degradation_factor": 0.9,
+    "overtaking_difficulty": 3,
+    "safety_car_probability": 0.25
+  },
+
+  "Las Vegas": {
+    "pit_loss": 20,
+    "degradation_factor": 0.8,
+    "overtaking_difficulty": 3,
+    "safety_car_probability": 0.40
+  },
+
+  "Qatar": {
+    "pit_loss": 20,
+    "degradation_factor": 1.4,
+    "overtaking_difficulty": 5,
+    "safety_car_probability": 0.25
+  },
+
+  "Abu Dhabi": {
+    "pit_loss": 21,
+    "degradation_factor": 1.0,
+    "overtaking_difficulty": 4,
+    "safety_car_probability": 0.25
+  }
+}

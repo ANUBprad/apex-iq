@@ -1,30 +1,39 @@
 export const CIRCUITS = [
-  { name: "Monaco", flag: "🇲🇨", pitLoss: 22.4, deg: "Low" },
-  { name: "Silverstone", flag: "🇬🇧", pitLoss: 19.8, deg: "High" },
-  { name: "Monza", flag: "🇮🇹", pitLoss: 21.1, deg: "Medium" },
-  { name: "Bahrain", flag: "🇧🇭", pitLoss: 22.9, deg: "High" },
-  { name: "Singapore", flag: "🇸🇬", pitLoss: 27.3, deg: "Medium" },
-  { name: "Spa", flag: "🇧🇪", pitLoss: 20.6, deg: "Medium" },
-  { name: "Suzuka", flag: "🇯🇵", pitLoss: 21.4, deg: "High" },
-  { name: "Interlagos", flag: "🇧🇷", pitLoss: 19.2, deg: "Medium" },
-  { name: "Abu Dhabi", flag: "🇦🇪", pitLoss: 21.8, deg: "Low" },
-  { name: "Miami", flag: "🇺🇸", pitLoss: 20.9, deg: "Medium" },
-  { name: "Las Vegas", flag: "🇺🇸", pitLoss: 22.1, deg: "Low" },
-  { name: "Qatar", flag: "🇶🇦", pitLoss: 23.0, deg: "High" },
-  { name: "Imola", flag: "🇮🇹", pitLoss: 26.8, deg: "Medium" },
+  { name: "Monaco", flag: "MC", pitLoss: 22.4, deg: "Low", degRate: 0.8, laps: 78, sectors: [28.4, 33.2, 21.8] },
+  { name: "Silverstone", flag: "GB", pitLoss: 19.8, deg: "High", degRate: 1.4, laps: 52, sectors: [27.1, 31.6, 19.4] },
+  { name: "Monza", flag: "IT", pitLoss: 21.1, deg: "Medium", degRate: 0.9, laps: 53, sectors: [26.8, 30.2, 18.6] },
+  { name: "Bahrain", flag: "BH", pitLoss: 22.9, deg: "High", degRate: 1.3, laps: 57, sectors: [28.2, 32.4, 20.1] },
+  { name: "Singapore", flag: "SG", pitLoss: 27.3, deg: "Medium", degRate: 1.1, laps: 62, sectors: [29.8, 34.2, 22.4] },
+  { name: "Spa", flag: "BE", pitLoss: 20.6, deg: "Medium", degRate: 1.0, laps: 44, sectors: [27.4, 32.8, 19.6] },
+  { name: "Suzuka", flag: "JP", pitLoss: 21.4, deg: "High", degRate: 1.2, laps: 53, sectors: [26.2, 31.4, 18.8] },
+  { name: "Interlagos", flag: "BR", pitLoss: 19.2, deg: "Medium", degRate: 1.0, laps: 71, sectors: [25.8, 30.6, 18.2] },
+  { name: "Abu Dhabi", flag: "AE", pitLoss: 21.8, deg: "Low", degRate: 0.8, laps: 58, sectors: [27.6, 32.2, 20.4] },
+  { name: "Miami", flag: "US", pitLoss: 20.9, deg: "Medium", degRate: 1.0, laps: 57, sectors: [27.2, 31.8, 19.6] },
+  { name: "Las Vegas", flag: "US", pitLoss: 22.1, deg: "Low", degRate: 0.7, laps: 50, sectors: [26.4, 30.8, 18.4] },
+  { name: "Qatar", flag: "QA", pitLoss: 23.0, deg: "High", degRate: 1.5, laps: 57, sectors: [28.6, 33.4, 21.2] },
+  { name: "Imola", flag: "IT", pitLoss: 26.8, deg: "Medium", degRate: 1.1, laps: 63, sectors: [28.4, 33.6, 21.8] },
+  { name: "Zandvoort", flag: "NL", pitLoss: 22.6, deg: "High", degRate: 1.3, laps: 72, sectors: [27.8, 32.4, 20.2] },
+  { name: "COTA", flag: "US", pitLoss: 21.6, deg: "Medium", degRate: 1.1, laps: 56, sectors: [27.4, 32.6, 19.8] },
+  { name: "Jeddah", flag: "SA", pitLoss: 19.4, deg: "Low", degRate: 0.9, laps: 50, sectors: [26.6, 30.4, 18.8] },
+  { name: "Melbourne", flag: "AU", pitLoss: 21.2, deg: "Medium", degRate: 1.0, laps: 58, sectors: [27.2, 31.8, 19.4] },
+  { name: "Montreal", flag: "CA", pitLoss: 20.4, deg: "Medium", degRate: 1.0, laps: 70, sectors: [26.8, 31.2, 19.0] },
+  { name: "Hungaroring", flag: "HU", pitLoss: 22.2, deg: "Medium", degRate: 1.1, laps: 70, sectors: [28.2, 33.0, 21.0] },
+  { name: "Baku", flag: "AZ", pitLoss: 20.8, deg: "Low", degRate: 0.8, laps: 51, sectors: [27.0, 31.6, 19.2] },
 ];
 
 export const COMPOUNDS = [
-  { id: "SOFT", color: "oklch(0.65 0.25 25)", label: "SOFT" },
-  { id: "MEDIUM", color: "oklch(0.85 0.18 90)", label: "MED" },
-  { id: "HARD", color: "oklch(0.95 0.01 0)", label: "HARD" },
-  { id: "INTER", color: "oklch(0.78 0.2 145)", label: "INTER" },
-  { id: "WET", color: "oklch(0.65 0.2 240)", label: "WET" },
+  { id: "SOFT", color: "#EF4444", label: "SOFT", shortLabel: "S", degRate: 0.12, gripBase: 98.4, stintWindow: [8, 18] },
+  { id: "MEDIUM", color: "#F59E0B", label: "MED", shortLabel: "M", degRate: 0.08, gripBase: 96.8, stintWindow: [14, 28] },
+  { id: "HARD", color: "#6B7280", label: "HARD", shortLabel: "H", degRate: 0.05, gripBase: 95.2, stintWindow: [22, 40] },
+  { id: "INTER", color: "#10B981", label: "INTER", shortLabel: "I", degRate: 0.15, gripBase: 94.0, stintWindow: [10, 20] },
+  { id: "WET", color: "#0EA5E9", label: "WET", shortLabel: "W", degRate: 0.18, gripBase: 92.0, stintWindow: [8, 16] },
 ] as const;
 
 export type CompoundId = (typeof COMPOUNDS)[number]["id"];
 
-// Fallback synthetic telemetry generators
+export const WEATHER_OPTIONS = ["Dry", "Light Rain", "Heavy Rain", "Changeable"] as const;
+export type WeatherOption = (typeof WEATHER_OPTIONS)[number];
+
 export function genDegCurve(seed = Math.random()) {
   return Array.from({ length: 30 }, (_, i) => ({
     lap: i + 1,
@@ -32,100 +41,4 @@ export function genDegCurve(seed = Math.random()) {
     medium: Math.max(30, 100 - i * (1.8 + seed * 0.3) - Math.random() * 3),
     hard: Math.max(45, 100 - i * (1.1 + seed * 0.2) - Math.random() * 2),
   }));
-}
-export function genPaceDelta() {
-  return Array.from({ length: 30 }, (_, i) => ({
-    lap: i + 1,
-    delta: +(Math.sin(i / 4) * 0.6 + (Math.random() - 0.5) * 0.4).toFixed(3),
-  }));
-}
-export function genPitWindow() {
-  return Array.from({ length: 30 }, (_, i) => ({
-    lap: i + 1,
-    prob: Math.max(0, Math.min(100, 30 + Math.sin((i - 15) / 3) * 60 + Math.random() * 8)),
-  }));
-}
-export function genUndercut() {
-  return Array.from({ length: 12 }, (_, i) => ({
-    lap: i + 1,
-    gain: +(Math.log(i + 2) * 1.6 - Math.random() * 0.4).toFixed(2),
-  }));
-}
-export function genFuel() {
-  return Array.from({ length: 50 }, (_, i) => ({
-    lap: i + 1,
-    fuel: Math.max(0, 110 - i * 2.1),
-  }));
-}
-export function genSector() {
-  return [
-    { axis: "S1", current: 92 + Math.random() * 5, optimal: 99 },
-    { axis: "S2", current: 88 + Math.random() * 6, optimal: 99 },
-    { axis: "S3", current: 90 + Math.random() * 5, optimal: 99 },
-  ];
-}
-
-export const STRATEGIES = [
-  { action: "PIT NOW", confidence: 0.87, reasoning: "Tyre degradation has crossed the 23% performance cliff — undercut window opens this lap with a 4.2s gap to clear traffic." },
-  { action: "STAY OUT", confidence: 0.74, reasoning: "Track evolution favours extending stint by 3 laps. Rivals lack the pace to undercut at current delta." },
-  { action: "UNDERCUT", confidence: 0.81, reasoning: "Fresh medium compound projected to gain 1.8s over rivals across the next 5 laps. Execute now." },
-  { action: "OVERCUT", confidence: 0.68, reasoning: "Cooler track temps and clean air ahead — extending the stint beats pitting into traffic by 2.4s." },
-];
-
-// Tyre status data generators
-export interface TyreStatusData {
-  position: string;
-  compound: "soft" | "medium" | "hard";
-  temperature: number;
-  wear: number;
-  frontTemp: number;
-  centerTemp: number;
-  rearTemp: number;
-}
-
-export const TYRE_STATUS: TyreStatusData[] = [
-  { position: "FL", compound: "medium", temperature: 87, wear: 65, frontTemp: 85, centerTemp: 87, rearTemp: 89 },
-  { position: "FR", compound: "medium", temperature: 89, wear: 63, frontTemp: 88, centerTemp: 89, rearTemp: 90 },
-  { position: "RL", compound: "medium", temperature: 92, wear: 68, frontTemp: 91, centerTemp: 92, rearTemp: 93 },
-  { position: "RR", compound: "medium", temperature: 94, wear: 70, frontTemp: 93, centerTemp: 94, rearTemp: 95 },
-];
-
-export function genTyreStatus(seed = Math.random()): TyreStatusData[] {
-  const baseTemp = 80 + seed * 15;
-  const baseWear = 40 + seed * 35;
-  return [
-    { position: "FL", compound: "medium", temperature: Math.round(baseTemp + 1), wear: Math.round(baseWear + 2), frontTemp: Math.round(baseTemp - 1), centerTemp: Math.round(baseTemp + 1), rearTemp: Math.round(baseTemp + 3) },
-    { position: "FR", compound: "medium", temperature: Math.round(baseTemp + 3), wear: Math.round(baseWear), frontTemp: Math.round(baseTemp + 2), centerTemp: Math.round(baseTemp + 3), rearTemp: Math.round(baseTemp + 4) },
-    { position: "RL", compound: "medium", temperature: Math.round(baseTemp + 6), wear: Math.round(baseWear + 5), frontTemp: Math.round(baseTemp + 5), centerTemp: Math.round(baseTemp + 6), rearTemp: Math.round(baseTemp + 7) },
-    { position: "RR", compound: "medium", temperature: Math.round(baseTemp + 8), wear: Math.round(baseWear + 7), frontTemp: Math.round(baseTemp + 7), centerTemp: Math.round(baseTemp + 8), rearTemp: Math.round(baseTemp + 9) },
-  ];
-}
-
-// Live telemetry stream data generator
-export interface TelemetryDataPoint {
-  time: number;
-  speed: number;
-  throttle: number;
-  brake: number;
-  gear: number;
-}
-
-export function genTelemetryStream(points = 120): TelemetryDataPoint[] {
-  return Array.from({ length: points }, (_, i) => {
-    const t = i;
-    // Simulate a lap-like pattern
-    const phase = (t % 30) / 30; // 0-1 within a 30s segment
-    const speedBase = 200 + Math.sin(phase * Math.PI * 2) * 80;
-    const throttleBase = phase < 0.7 ? 80 + Math.random() * 20 : Math.random() * 30;
-    const brakeBase = phase > 0.7 && phase < 0.85 ? 60 + Math.random() * 40 : Math.random() * 5;
-    const gearBase = Math.max(1, Math.min(8, Math.round(3 + Math.sin(phase * Math.PI) * 4)));
-
-    return {
-      time: t,
-      speed: Math.round(speedBase + (Math.random() - 0.5) * 10),
-      throttle: Math.round(Math.max(0, Math.min(100, throttleBase))),
-      brake: Math.round(Math.max(0, Math.min(100, brakeBase))),
-      gear: gearBase,
-    };
-  });
 }

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TelemetryRouteImport } from './routes/telemetry'
 import { Route as SimulationsRouteImport } from './routes/simulations'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CircuitsRouteImport } from './routes/circuits'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -30,6 +31,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CircuitsRoute = CircuitsRouteImport.update({
+  id: '/circuits',
+  path: '/circuits',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -44,6 +50,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/circuits': typeof CircuitsRoute
   '/dashboard': typeof DashboardRoute
   '/simulations': typeof SimulationsRoute
   '/telemetry': typeof TelemetryRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/circuits': typeof CircuitsRoute
   '/dashboard': typeof DashboardRoute
   '/simulations': typeof SimulationsRoute
   '/telemetry': typeof TelemetryRoute
@@ -59,21 +67,42 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/circuits': typeof CircuitsRoute
   '/dashboard': typeof DashboardRoute
   '/simulations': typeof SimulationsRoute
   '/telemetry': typeof TelemetryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/dashboard' | '/simulations' | '/telemetry'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/circuits'
+    | '/dashboard'
+    | '/simulations'
+    | '/telemetry'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/dashboard' | '/simulations' | '/telemetry'
-  id: '__root__' | '/' | '/about' | '/dashboard' | '/simulations' | '/telemetry'
+  to:
+    | '/'
+    | '/about'
+    | '/circuits'
+    | '/dashboard'
+    | '/simulations'
+    | '/telemetry'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/circuits'
+    | '/dashboard'
+    | '/simulations'
+    | '/telemetry'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  CircuitsRoute: typeof CircuitsRoute
   DashboardRoute: typeof DashboardRoute
   SimulationsRoute: typeof SimulationsRoute
   TelemetryRoute: typeof TelemetryRoute
@@ -102,6 +131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/circuits': {
+      id: '/circuits'
+      path: '/circuits'
+      fullPath: '/circuits'
+      preLoaderRoute: typeof CircuitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -122,6 +158,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  CircuitsRoute: CircuitsRoute,
   DashboardRoute: DashboardRoute,
   SimulationsRoute: SimulationsRoute,
   TelemetryRoute: TelemetryRoute,

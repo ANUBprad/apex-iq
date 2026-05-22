@@ -10,7 +10,8 @@ const config: Config = {
       fontFamily: {
         orbitron: ['Orbitron', 'ui-monospace', 'monospace'],
         rajdhani: ['Rajdhani', 'ui-monospace', 'monospace'],
-        inter: ['Inter', 'ui-sans-serif', 'sans-serif'],
+        grotesk: ['Space Grotesk', 'ui-sans-serif', 'sans-serif'],
+        inter: ['Google Sans', 'Inter', 'ui-sans-serif', 'sans-serif'],
         mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
       },
 

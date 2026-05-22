@@ -13,9 +13,10 @@ export function GlowButton({ variant = "filled", pulse, className, children, ...
       <button
         {...rest}
         className={cn(
-          "font-orbitron uppercase tracking-widest text-sm px-6 py-3 rounded-md",
-          "border border-apex-red text-apex-red bg-transparent",
-          "transition-all duration-300 hover:bg-apex-red/15 hover:shadow-[0_0_25px_rgba(255,30,30,0.4)]",
+          "font-rajdhani font-semibold text-[13px] tracking-[0.08em] uppercase px-5 py-2.5 rounded-md",
+          "border border-border text-cyan-electric bg-transparent",
+          "transition-all duration-200 hover:bg-accent hover:border-[rgba(0,217,255,0.35)] hover:text-cyan-electric",
+          "active:scale-[0.98]",
           className
         )}
       >
@@ -27,8 +28,11 @@ export function GlowButton({ variant = "filled", pulse, className, children, ...
     <button
       {...rest}
       className={cn(
-        "apex-btn-glow font-orbitron uppercase tracking-widest text-sm px-6 py-3 rounded-md text-white",
-        pulse && "animate-pulse-glow",
+        "bg-red-ferrari font-rajdhani font-semibold text-[13px] tracking-[0.08em] uppercase px-5 py-2.5 rounded-md text-white",
+        "shadow-glow-red-sm",
+        "transition-all duration-200 hover:brightness-110 hover:shadow-glow-red",
+        "active:scale-[0.98]",
+        "disabled:bg-border disabled:text-muted-foreground disabled:cursor-not-allowed disabled:shadow-none",
         className
       )}
     >

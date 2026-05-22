@@ -12,6 +12,19 @@ import { CinematicLoader } from "@/components/ui-apex/CinematicLoader";
 
 import appCss from "../styles.css?url";
 
+const THEME_SCRIPT = `
+(function () {
+  try {
+    var key = 'apexiq-theme';
+    var stored = localStorage.getItem(key);
+    var theme = (stored === 'light' || stored === 'dark') ? stored : 'dark';
+    var root = document.documentElement;
+    if (theme === 'dark') root.classList.add('dark');
+    else root.classList.remove('dark');
+  } catch (e) {}
+})();
+`;
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -74,14 +87,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "APEXiq · Race Strategy OS" },
+      {
+        name: "description",
+        content:
+          "AI-powered Formula 1 race engineering and motorsport intelligence platform — strategy optimization, telemetry analysis, tyre prediction, and simulation.",
+      },
+      { property: "og:title", content: "APEXiq · Race Strategy OS" },
+      {
+        property: "og:description",
+        content:
+          "Race strategy intelligence, telemetry analysis, tyre degradation prediction, and simulation — designed like a Formula 1 pit wall.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -100,8 +119,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <HeadContent />
       </head>
       <body>
