@@ -9,7 +9,10 @@ function buildSampleTelemetry() {
     const t = i;
     const phase = i / 12;
     const speed = base + Math.sin(phase) * 28 + Math.sin(i / 4) * 6;
-    const throttle = Math.max(0, Math.min(100, 78 + Math.sin(phase + 0.5) * 22));
+    const throttle = Math.max(
+      0,
+      Math.min(100, 78 + Math.sin(phase + 0.5) * 22),
+    );
     const brake = Math.max(0, Math.min(100, 22 + Math.sin(phase + 2.1) * 26));
     return { time: t, speed, throttle, brake };
   });
@@ -36,8 +39,9 @@ export function TelemetryIntelligence() {
               Engineering-grade traces, not dashboard widgets.
             </h2>
             <p className="mt-5 text-[14px] md:text-[15px] text-muted-foreground leading-[1.8] max-w-2xl">
-              Speed, throttle, brake, tyre wear and fuel trends — designed for engineers, strategists, and sim racers who
-              need clean signal, fast.
+              Speed, throttle, brake, tyre wear and fuel trends — designed for
+              engineers, strategists, and sim racers who need clean signal,
+              fast.
             </p>
           </div>
 
@@ -55,4 +59,3 @@ export function TelemetryIntelligence() {
     </section>
   );
 }
-

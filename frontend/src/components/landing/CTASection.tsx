@@ -27,7 +27,9 @@ export function CTASection() {
         </h2>
 
         <p className="mt-4 text-[14px] text-muted-foreground max-w-xl mx-auto leading-[1.8]">
-          Enter the race command experience: inputs on the left, strategy recommendation in the center, and engineering intelligence on the right.
+          Enter the race command experience: inputs on the left, strategy
+          recommendation in the center, and engineering intelligence on the
+          right.
         </p>
 
         <motion.div
@@ -39,12 +41,14 @@ export function CTASection() {
         >
           <Link to="/dashboard">
             <GlowButton className="flex items-center gap-2">
-              Launch Strategy Center <ArrowRight className="w-4 h-4" strokeWidth={1.8} />
+              Launch Strategy Center{" "}
+              <ArrowRight className="w-4 h-4" strokeWidth={1.8} />
             </GlowButton>
           </Link>
           <Link to="/telemetry">
             <GlowButton variant="outline" className="flex items-center gap-2">
-              Explore Telemetry <ArrowRight className="w-4 h-4" strokeWidth={1.8} />
+              Explore Telemetry{" "}
+              <ArrowRight className="w-4 h-4" strokeWidth={1.8} />
             </GlowButton>
           </Link>
         </motion.div>

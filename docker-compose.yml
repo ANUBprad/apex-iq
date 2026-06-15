@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: apexiq-db
+    environment:
+      - POSTGRES_USER=apexiq
+      - POSTGRES_PASSWORD=apexiq_pass
+      - POSTGRES_DB=apexiq
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apexiq"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: 
+      context: ./backend
+      dockerfile: ../docker/backend.Dockerfile
+    container_name: apexiq-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://apexiq:apexiq_pass@db:5432/apexiq
+      - VITE_API_URL=http://localhost:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+volumes:
+  postgres_data:

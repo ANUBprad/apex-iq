@@ -1,117 +1,262 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { GlowButton } from "@/components/ui-apex/GlowButton";
-import heroF1 from "@/assets/hero-f1.jpg";
+import { YAS_MARINA_CIRCUIT_PATH, CIRCUIT_VIEWBOX } from "@/lib/circuit-path";
+import {
+  HERO_RAY_PLACEMENTS,
+  computeRaysFromPath,
+  type ComputedRay,
+} from "@/lib/ray-config";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+
+const HERO_EASE = [0.16, 1, 0.3, 1] as const;
 
 const STAGGER = {
-  container: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
+  container: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } },
   item: {
-    hidden: { opacity: 0, y: 16 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: HERO_EASE } },
   },
 };
 
 export function Hero() {
+  const shouldReduceMotion = useReducedMotion();
+  const pathRef = useRef<SVGPathElement>(null);
+  const [rays, setRays] = useState<ComputedRay[]>([]);
+
+  useEffect(() => {
+    const path = pathRef.current;
+    if (!path) return;
+    setRays(computeRaysFromPath(path, HERO_RAY_PLACEMENTS));
+  }, []);
+
   return (
-    <section className="relative w-full min-h-[100svh] overflow-hidden bg-background">
-      {/* Background image */}
+    <section
+      role="region"
+      aria-label="Hero banner"
+      className="hero-section relative w-full min-h-[100svh] overflow-hidden flex items-center justify-center"
+    >
+      {/* Layer 1: Base black canvas */}
+      <div className="hero-section-base absolute inset-0 z-[5]" aria-hidden />
+
+      {/* Layer 2: Transparent black atmosphere */}
       <div
-        className="absolute inset-0 opacity-35 dark:opacity-40"
-        style={{
-          backgroundImage: `url(${heroF1})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+        className="hero-section-gradient absolute inset-0 z-[5]"
         aria-hidden
       />
 
-      {/* Gradient + grid overlays */}
-      <div className="absolute inset-0 apex-radial-bg opacity-90 dark:opacity-100" aria-hidden />
-      <div className="absolute inset-0 apex-grid-bg opacity-20 dark:opacity-60" aria-hidden />
-
-      {/* Circuit outline overlay */}
-      <motion.svg
+      {/* Layer 3: Circuit path + radiating rays (z-index 10) */}
+      <div
+        className="circuit-background absolute inset-0 z-[10] pointer-events-none"
         aria-hidden
-        className="absolute inset-0 w-full h-full opacity-[0.22] dark:opacity-[0.18]"
-        viewBox="0 0 1200 700"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.2 }}
       >
-        <path
-          d="M188 446 C220 272, 348 202, 474 228 C562 246, 611 205, 662 160 C720 108, 802 90, 892 112 C1004 140, 1044 236, 1008 326 C985 383, 933 415, 875 438 C795 470, 748 525, 700 571 C648 621, 556 632, 470 604 C355 566, 266 548, 188 446 Z"
-          fill="none"
-          stroke="rgba(0,217,255,0.55)"
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M220 454 C248 300, 356 244, 470 266 C560 285, 615 236, 676 182 C736 128, 804 114, 878 133 C972 157, 1004 232, 975 306 C954 360, 906 393, 850 412 C775 438, 728 490, 678 534 C629 575, 552 586, 480 561 C373 525, 292 518, 220 454 Z"
-          fill="none"
-          stroke="rgba(220,20,60,0.38)"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-          strokeDasharray="6 8"
-        />
-      </motion.svg>
+        <motion.svg
+          className="circuit-svg w-full h-full"
+          viewBox={CIRCUIT_VIEWBOX}
+          preserveAspectRatio="xMidYMid slice"
+          initial={shouldReduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+        >
+          <defs>
+            <filter
+              id="heroCircuitGlow"
+              x="-60%"
+              y="-60%"
+              width="220%"
+              height="220%"
+            >
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <filter
+              id="heroRayGlow"
+              x="-60%"
+              y="-60%"
+              width="220%"
+              height="220%"
+            >
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <pattern
+              id="heroGrid"
+              width="50"
+              height="50"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M 50 0 L 0 0 0 50"
+                fill="none"
+                stroke="var(--hero-circuit-grid)"
+                strokeWidth="0.5"
+              />
+            </pattern>
+          </defs>
 
-      <div className="relative max-w-[1200px] mx-auto px-6 pt-28 pb-16 md:pt-36 md:pb-24">
-        <motion.div variants={STAGGER.container} initial="hidden" animate="show">
-          {/* Status badge */}
-          <motion.div
-            variants={STAGGER.item}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-md border border-border bg-card/40 backdrop-blur mb-8"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-green-telemetry" />
-            <span className="font-rajdhani text-[11px] tracking-[0.22em] text-muted-foreground uppercase font-semibold">
-              Strategy Center Online
-            </span>
-            <span className="w-px h-3 bg-border" />
-            <span className="font-mono text-[10px] tracking-[0.16em] text-muted-foreground uppercase">
-              APEXIQ · BUILD 0.1
-            </span>
-          </motion.div>
+          <rect
+            width="1200"
+            height="800"
+            fill="url(#heroGrid)"
+            opacity="0.08"
+          />
 
-          {/* Headline */}
-          <motion.h1
-            variants={STAGGER.item}
-            className="font-orbitron font-semibold text-[38px] md:text-[56px] lg:text-[72px] tracking-[-0.03em] text-foreground leading-[0.98]"
-          >
-            Predict The Race
-            <br />
-            Before It Happens
-          </motion.h1>
+          {/* Glow halo */}
+          <path
+            d={YAS_MARINA_CIRCUIT_PATH}
+            fill="none"
+            stroke="#06b6d4"
+            strokeWidth="16"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity="0.15"
+          />
 
-          {/* Supporting */}
-          <motion.p
-            variants={STAGGER.item}
-            className="mt-5 font-sans text-[14px] md:text-[16px] text-muted-foreground max-w-2xl leading-[1.75]"
-          >
-            AI-powered race intelligence for strategy optimization, telemetry analysis, tyre prediction, and race simulation.
-          </motion.p>
+          {/* Main circuit boundary */}
+          <motion.path
+            ref={pathRef}
+            d={YAS_MARINA_CIRCUIT_PATH}
+            fill="none"
+            stroke="#06b6d4"
+            strokeWidth="8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            filter="url(#heroCircuitGlow)"
+            className="circuit-path"
+            initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+          />
 
-          {/* CTAs */}
-          <motion.div variants={STAGGER.item} className="mt-10 flex flex-wrap gap-3">
-            <Link to="/dashboard">
-              <GlowButton className="flex items-center gap-2">
-                Launch Strategy Center <ArrowRight className="w-4 h-4" strokeWidth={1.8} />
-              </GlowButton>
-            </Link>
-            <Link to="/telemetry">
-              <GlowButton variant="outline" className="flex items-center gap-2">
-                Explore Telemetry <ArrowRight className="w-4 h-4" strokeWidth={1.8} />
-              </GlowButton>
-            </Link>
-          </motion.div>
-        </motion.div>
+          {/* Radiating ray pulses */}
+          {rays.length > 0 && (
+            <g className="rays">
+              {rays.map((ray) => (
+                <g
+                  key={ray.id}
+                  className={`hero-ray ${ray.id}`}
+                  style={
+                    {
+                      "--ray-delay": `${ray.delay}s`,
+                      "--ray-len": `${ray.len}`,
+                    } as CSSProperties
+                  }
+                  filter="url(#heroRayGlow)"
+                >
+                  <line
+                    x1={ray.x1}
+                    y1={ray.y1}
+                    x2={ray.x2}
+                    y2={ray.y2}
+                    className={
+                      shouldReduceMotion
+                        ? "hero-ray-line-static"
+                        : "hero-ray-line"
+                    }
+                    stroke={ray.color}
+                    strokeLinecap="round"
+                    strokeDasharray={ray.len}
+                    strokeDashoffset={shouldReduceMotion ? 0 : ray.len}
+                  />
+                  <circle
+                    cx={ray.x2}
+                    cy={ray.y2}
+                    r="4"
+                    className={
+                      shouldReduceMotion
+                        ? "hero-ray-tip-static"
+                        : "hero-ray-tip"
+                    }
+                    fill={ray.color}
+                  />
+                </g>
+              ))}
+            </g>
+          )}
+        </motion.svg>
       </div>
 
+      {/* Layer 4: Content readability scrim */}
+      <div
+        className="hero-content-scrim absolute inset-0 z-[15] pointer-events-none"
+        aria-hidden
+      />
+
+      {/* Layer 5: Hero content (z-index 20) */}
+      <motion.div
+        className="hero-content relative z-[20] max-w-[700px] px-5 md:px-12 lg:px-[48px] py-28 md:py-32 text-left mx-auto lg:mx-0 lg:ml-[max(5vw,48px)]"
+        variants={STAGGER.container}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.div
+          variants={STAGGER.item}
+          className="inline-flex items-center gap-2 px-3 py-1 rounded-md border border-border bg-card/50 backdrop-blur mb-8"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-green-telemetry" />
+          <span className="font-rajdhani text-[11px] tracking-[0.22em] text-muted-foreground uppercase font-semibold">
+            Strategy Center Online
+          </span>
+          <span className="w-px h-3 bg-border" />
+          <span className="font-mono text-[10px] tracking-[0.16em] text-muted-foreground uppercase">
+            APEXIQ · BUILD 0.1
+          </span>
+        </motion.div>
+
+        <motion.h1
+          variants={STAGGER.item}
+          className="font-grotesk font-bold text-[36px] md:text-[48px] lg:text-[64px] tracking-[-0.03em] text-foreground leading-[1.1] [text-shadow:0_2px_12px_rgba(0,0,0,0.6)]"
+        >
+          AI-Powered Formula 1
+          <br />
+          Race Intelligence
+        </motion.h1>
+
+        <motion.p
+          variants={STAGGER.item}
+          className="mt-6 font-sans text-[15px] md:text-[18px] text-muted-foreground max-w-[550px] leading-[1.6] [text-shadow:0_1px_8px_rgba(0,0,0,0.4)]"
+        >
+          Real-time strategy simulation, tyre degradation prediction, traffic
+          analysis and AI race engineer recommendations.
+        </motion.p>
+
+        <motion.div
+          variants={STAGGER.item}
+          className="mt-10 flex flex-wrap gap-4"
+        >
+          <Link to="/dashboard">
+            <GlowButton className="flex items-center gap-2">
+              Explore Dashboard{" "}
+              <ArrowRight className="w-4 h-4" strokeWidth={1.8} />
+            </GlowButton>
+          </Link>
+          <Link to="/simulations">
+            <GlowButton variant="outline" className="flex items-center gap-2">
+              View Strategy Engine{" "}
+              <ArrowRight className="w-4 h-4" strokeWidth={1.8} />
+            </GlowButton>
+          </Link>
+        </motion.div>
+      </motion.div>
+
       {/* Scroll indicator */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-        <div className="h-10 w-[1px] bg-gradient-to-b from-transparent via-border to-transparent" aria-hidden />
-        <div className="h-5 w-[2px] bg-cyan-electric/30 rounded-full overflow-hidden" aria-hidden>
-          <div className="h-2 w-full bg-cyan-electric/70 scroll-down" />
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-[20] flex flex-col items-center gap-2">
+        <div
+          className="h-10 w-px bg-gradient-to-b from-transparent via-border to-transparent"
+          aria-hidden
+        />
+        <div
+          className="h-5 w-[2px] bg-white/15 rounded-full overflow-hidden"
+          aria-hidden
+        >
+          <div className="h-2 w-full bg-white/50 scroll-down" />
         </div>
       </div>
     </section>

@@ -32,8 +32,9 @@ export function Footer() {
               APEX<span className="text-red-ferrari">iq</span>
             </div>
             <p className="mt-3 text-[14px] text-muted-foreground max-w-sm leading-[1.75]">
-              AI-powered race intelligence for strategy optimization, telemetry analysis, tyre prediction, and simulation —
-              designed like a Formula 1 command center.
+              AI-powered race intelligence for strategy optimization, telemetry
+              analysis, tyre prediction, and simulation — designed like a
+              Formula 1 command center.
             </p>
             <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-md border border-border bg-background/30">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-electric/70" />
@@ -46,11 +47,16 @@ export function Footer() {
           <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-6">
             {Object.entries(NAV).map(([heading, items]) => (
               <div key={heading}>
-                <div className="text-[12px] font-semibold text-foreground uppercase tracking-[0.5px] mb-3">{heading}</div>
+                <div className="text-[12px] font-semibold text-foreground uppercase tracking-[0.5px] mb-3">
+                  {heading}
+                </div>
                 <ul className="flex flex-col gap-2">
                   {items.map((item) =>
                     typeof item === "string" ? (
-                      <li key={item} className="text-[13px] text-muted-foreground transition-colors cursor-default">
+                      <li
+                        key={item}
+                        className="text-[13px] text-muted-foreground transition-colors cursor-default"
+                      >
                         {item}
                       </li>
                     ) : (
@@ -62,7 +68,7 @@ export function Footer() {
                           {item.label}
                         </Link>
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </div>
@@ -74,7 +80,9 @@ export function Footer() {
         <div className="border-t border-border pt-4 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="w-1 h-1 rounded-full bg-red-ferrari/80" />
-            <span className="text-[12px] text-muted-foreground">Built at the limit.</span>
+            <span className="text-[12px] text-muted-foreground">
+              Built at the limit.
+            </span>
           </div>
           <div className="text-[12px] text-muted-foreground">
             &copy; {new Date().getFullYear()} APEXiq

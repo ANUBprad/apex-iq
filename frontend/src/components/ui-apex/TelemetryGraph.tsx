@@ -37,7 +37,9 @@ const METRIC_LABELS: Record<string, string> = {
 };
 
 export function TelemetryGraph({ data, className }: TelemetryGraphProps) {
-  const [selectedMetrics, setSelectedMetrics] = useState<Record<string, boolean>>({
+  const [selectedMetrics, setSelectedMetrics] = useState<
+    Record<string, boolean>
+  >({
     speed: true,
     throttle: true,
     brake: true,
@@ -48,8 +50,25 @@ export function TelemetryGraph({ data, className }: TelemetryGraphProps) {
     setSelectedMetrics((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  if (data.length === 0) {
+    return (
+      <div
+        className={`bg-bg-elevated border border-border-subtle rounded-sm p-6 ${className ?? ""}`}
+      >
+        <div className="font-rajdhani text-sm uppercase tracking-wide text-text-primary">
+          Live Telemetry
+        </div>
+        <div className="mt-6 text-sm text-text-secondary">
+          No telemetry samples are available for this session.
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`bg-bg-elevated border border-border-subtle rounded-sm p-6 ${className ?? ""}`}>
+    <div
+      className={`bg-bg-elevated border border-border-subtle rounded-sm p-6 ${className ?? ""}`}
+    >
       <div className="flex items-center justify-between mb-4">
         <div className="font-rajdhani text-sm uppercase tracking-wide text-text-primary">
           Live Telemetry (Last 120s)
@@ -57,7 +76,10 @@ export function TelemetryGraph({ data, className }: TelemetryGraphProps) {
       </div>
 
       <ResponsiveContainer width="100%" height={240}>
-        <LineChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+        <LineChart
+          data={data}
+          margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+        >
           <CartesianGrid strokeDasharray="3 3" stroke="#333333" opacity={0.3} />
 
           <XAxis

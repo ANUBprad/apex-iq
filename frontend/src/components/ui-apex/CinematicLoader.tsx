@@ -11,7 +11,9 @@ export function CinematicLoader({ label = "Loading" }: { label?: string }) {
           className="inline-flex items-center gap-2 px-3 py-1 rounded-md border border-[rgba(14,165,233,0.2)] bg-[rgba(14,165,233,0.05)]"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-[#0EA5E9] animate-pulse" />
-          <span className="font-mono text-[10px] tracking-[0.15em] text-[#0EA5E9] uppercase font-medium">{label}</span>
+          <span className="font-mono text-[10px] tracking-[0.15em] text-[#0EA5E9] uppercase font-medium">
+            {label}
+          </span>
         </motion.div>
 
         <h1 className="font-inter font-bold text-[36px] md:text-[48px] tracking-[-0.02em] text-[#1A1D29]">
@@ -24,7 +26,10 @@ export function CinematicLoader({ label = "Loading" }: { label?: string }) {
             <span className="text-[#0EA5E9]">...</span>
           </div>
           <div className="relative h-[2px] bg-[#E5E7EB] overflow-hidden rounded-full">
-            <span className="absolute inset-y-0 left-0 w-1/3 bg-[#0EA5E9] rounded-full animate-[shimmer_1.5s_infinite]" style={{ backgroundSize: "200% 100%" }} />
+            <span
+              className="absolute inset-y-0 left-0 w-1/3 bg-[#0EA5E9] rounded-full animate-[shimmer_1.5s_infinite]"
+              style={{ backgroundSize: "200% 100%" }}
+            />
           </div>
         </div>
       </div>

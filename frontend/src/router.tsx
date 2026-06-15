@@ -11,7 +11,9 @@ export const getRouter = () => {
     context: { queryClient },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
-    defaultPendingComponent: () => <CinematicLoader label="Loading Telemetry Stream" />,
+    defaultPendingComponent: () => (
+      <CinematicLoader label="Loading Telemetry Stream" />
+    ),
     defaultPendingMs: 150,
   });
 

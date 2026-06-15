@@ -1,0 +1,45 @@
+[
+{
+  "race_name": "Monaco GP",
+  "circuit": "Monaco",
+  "season": 2024,
+
+  "winner": "Charles Leclerc",
+
+  "events": [
+    {
+      "lap": 1,
+      "type": "START",
+      "description": "Race Start"
+    },
+    {
+      "lap": 28,
+      "type": "PIT",
+      "description": "Pit Stop"
+    },
+    {
+      "lap": 45,
+      "type": "SAFETY_CAR",
+      "description": "Safety Car Deployed"
+    },
+    {
+      "lap": 78,
+      "type": "FINISH",
+      "description": "Race Finish"
+    }
+  ]
+},
+  {
+    "race_name": "Singapore GP",
+    "circuit": "Singapore",
+    "season": 2024,
+    "winner": "Carlos Sainz",
+    "winning_strategy": "1 Stop Medium-Hard",
+    "pit_stop_lap": 21,
+    "safety_cars": 2,
+    "weather": "Dry",
+    "total_laps": 62,
+    "average_pace": 92.5,
+    "strategy_success_score": 89
+  }
+]

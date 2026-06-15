@@ -1,120 +1,140 @@
 import { useState, useCallback } from "react";
-import { getStrategy, simulate, type StrategyInput, type StrategyResult, type SimulationResult } from "@/lib/api";
+import {
+  getStrategy,
+  simulate,
+  getStrategyComparison,
+  getSafetyCarAnalysis,
+  getRainStrategy,
+  getMonteCarlo,
+  getRaceOutcome,
+  type RaceOutcomeResponse,
+  type MonteCarloResponse,
+  type RainStrategyResponse,
+  type SafetyCarResponse,
+  type StrategyInput,
+} from "@/lib/api";
 
-export interface Strategy {
-  action: string;
-  confidence: number;
-  reasoning: string;
-  estimatedGain: number;
-  estimatedLoss: number;
-  riskLevel: string;
-  pitWindow: string;
-  explanation: string;
-  comparisons: StrategyComparison[];
-}
+import type {
+  StrategyData,
+  ComparisonData,
+  SimulationData,
+  EngineBriefing,
+  StrategyReasoning,
+  PitWindowData,
+} from "@/types/strategy";
+import {
+  mapComparison,
+  mapSimulation,
+  mapStrategy,
+} from "@/lib/strategy-mappers";
 
-export interface StrategyComparison {
-  option: string;
-  expectedGain: number;
-  expectedLoss: number;
-  risk: number;
-  confidence: number;
-}
-
-export interface SimulationData {
-  stayOutLoss: number;
-  pitLoss: number;
-  undercutGain: number;
-  undercutPossible: boolean;
-}
+export type { StrategyData, ComparisonData, SimulationData };
 
 export function useStrategy() {
-  const [strategy, setStrategy] = useState<Strategy | null>(null);
+  const [strategy, setStrategy] = useState<StrategyData | null>(null);
   const [simulation, setSimulation] = useState<SimulationData | null>(null);
+  const [comparison, setComparison] = useState<ComparisonData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [seed, setSeed] = useState(0);
+  const [safetyCar, setSafetyCar] = useState<SafetyCarResponse | null>(null);
+  const [rainStrategy, setRainStrategy] = useState<RainStrategyResponse | null>(
+    null,
+  );
+  const [monteCarlo, setMonteCarlo] = useState<MonteCarloResponse | null>(null);
+  const [raceOutcome, setRaceOutcome] = useState<RaceOutcomeResponse | null>(
+    null,
+  );
 
   const run = useCallback(async (input: StrategyInput) => {
     setLoading(true);
     setError(null);
+    setStrategy(null);
+    setSimulation(null);
+    setComparison(null);
+    setSafetyCar(null);
+    setRainStrategy(null);
+    setMonteCarlo(null);
+    setRaceOutcome(null);
 
     try {
-      const [strategyRes, simRes] = await Promise.allSettled([
+      const [
+        strategyRes,
+        simRes,
+        comparisonRes,
+        safetyCarRes,
+        rainStrategyRes,
+        monteCarloRes,
+        raceOutcomeRes,
+      ] = await Promise.allSettled([
         getStrategy(input),
         simulate(input),
+        getStrategyComparison(input),
+        getSafetyCarAnalysis(input),
+        getRainStrategy(input),
+        getMonteCarlo(input),
+        getRaceOutcome(input),
       ]);
 
-      if (strategyRes.status === "fulfilled") {
-        const s = strategyRes.value;
-        const simData = simRes.status === "fulfilled" ? simRes.value : null;
-
-        const comparisons: StrategyComparison[] = [
-          {
-            option: "STAY OUT",
-            expectedGain: 0,
-            expectedLoss: simData?.stay_out_loss ?? 0,
-            risk: s.confidence < 0.5 ? 0.7 : 0.3,
-            confidence: s.action === "STAY OUT" ? s.confidence : 1 - s.confidence,
-          },
-          {
-            option: "PIT NOW",
-            expectedGain: simData ? -(simData.pit_loss) : 0,
-            expectedLoss: simData?.pit_loss ?? 0,
-            risk: s.confidence < 0.5 ? 0.4 : 0.2,
-            confidence: s.action === "PIT NOW" ? s.confidence : 1 - s.confidence,
-          },
-          {
-            option: "UNDERCUT",
-            expectedGain: simData?.undercut_gain ?? 0,
-            expectedLoss: simData?.pit_loss ?? 0,
-            risk: simData?.undercut_possible ? 0.3 : 0.8,
-            confidence: s.action.includes("UNDERCUT") ? s.confidence : 0.3,
-          },
-          {
-            option: "OVERCUT",
-            expectedGain: simData ? simData.stay_out_loss * 0.3 : 0,
-            expectedLoss: simData?.stay_out_loss ?? 0,
-            risk: 0.5,
-            confidence: s.action === "OVERCUT" ? s.confidence : 0.25,
-          },
-        ];
-
-        const riskLevel = s.confidence > 0.75 ? "LOW" : s.confidence > 0.5 ? "MEDIUM" : "HIGH";
-        const pitWindow = simData?.undercut_possible
-          ? `L${input.tyre_age}-L${input.tyre_age + 5}`
-          : "Not available";
-
-        setStrategy({
-          action: s.action,
-          confidence: s.confidence,
-          reasoning: s.reasoning,
-          estimatedGain: simData?.undercut_gain ?? 0,
-          estimatedLoss: simData?.pit_loss ?? 0,
-          riskLevel,
-          pitWindow,
-          explanation: s.reasoning,
-          comparisons,
-        });
-
-        if (simData) {
-          setSimulation({
-            stayOutLoss: simData.stay_out_loss,
-            pitLoss: simData.pit_loss,
-            undercutGain: simData.undercut_gain,
-            undercutPossible: simData.undercut_possible,
-          });
-        }
-      } else {
+      if (strategyRes.status !== "fulfilled") {
+        setStrategy(null);
+        setSimulation(null);
+        setComparison(null);
         setError("Strategy engine unavailable. Check backend connection.");
+        return;
+      }
+
+      if (safetyCarRes.status === "fulfilled") {
+        setSafetyCar(safetyCarRes.value);
+      } else {
+        setSafetyCar(null);
+      }
+
+      if (rainStrategyRes.status === "fulfilled") {
+        setRainStrategy(rainStrategyRes.value);
+      } else {
+        setRainStrategy(null);
+      }
+
+      if (monteCarloRes.status === "fulfilled") {
+        setMonteCarlo(monteCarloRes.value);
+      }
+
+      if (raceOutcomeRes.status === "fulfilled") {
+        setRaceOutcome(raceOutcomeRes.value);
+      }
+
+      const strategyApi = strategyRes.value;
+
+      if (simRes.status === "fulfilled") {
+        setSimulation(mapSimulation(simRes.value));
+        setStrategy(mapStrategy(strategyApi, simRes.value));
+      } else {
+        setSimulation(null);
+        setStrategy(mapStrategy(strategyApi, null));
+      }
+
+      if (comparisonRes.status === "fulfilled") {
+        setComparison(mapComparison(comparisonRes.value));
+      } else {
+        setComparison(null);
       }
     } catch {
       setError("Strategy engine unavailable. Check backend connection.");
     } finally {
-      setSeed(Math.random());
       setLoading(false);
     }
   }, []);
 
-  return { strategy, simulation, loading, error, run, seed };
+  return {
+    strategy,
+    simulation,
+    comparison,
+    safetyCar,
+    rainStrategy,
+    monteCarlo,
+    raceOutcome,
+    loading,
+    error,
+    run,
+  };
 }

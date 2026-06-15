@@ -7,7 +7,13 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
 }
 
-export function GlowButton({ variant = "filled", pulse, className, children, ...rest }: Props) {
+export function GlowButton({
+  variant = "filled",
+  pulse,
+  className,
+  children,
+  ...rest
+}: Props) {
   if (variant === "outline") {
     return (
       <button
@@ -17,7 +23,7 @@ export function GlowButton({ variant = "filled", pulse, className, children, ...
           "border border-border text-cyan-electric bg-transparent",
           "transition-all duration-200 hover:bg-accent hover:border-[rgba(0,217,255,0.35)] hover:text-cyan-electric",
           "active:scale-[0.98]",
-          className
+          className,
         )}
       >
         {children}
@@ -33,7 +39,7 @@ export function GlowButton({ variant = "filled", pulse, className, children, ...
         "transition-all duration-200 hover:brightness-110 hover:shadow-glow-red",
         "active:scale-[0.98]",
         "disabled:bg-border disabled:text-muted-foreground disabled:cursor-not-allowed disabled:shadow-none",
-        className
+        className,
       )}
     >
       {children}

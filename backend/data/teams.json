@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Red Bull",
+    "aggression": 95,
+    "undercut_bias": 92,
+    "risk_tolerance": 90,
+    "tyre_focus": 75,
+    "weather_adaptability": 88
+  },
+  {
+    "name": "Mercedes",
+    "aggression": 75,
+    "undercut_bias": 70,
+    "risk_tolerance": 72,
+    "tyre_focus": 94,
+    "weather_adaptability": 92
+  },
+  {
+    "name": "Ferrari",
+    "aggression": 82,
+    "undercut_bias": 80,
+    "risk_tolerance": 78,
+    "tyre_focus": 82,
+    "weather_adaptability": 76
+  },
+  {
+    "name": "McLaren",
+    "aggression": 85,
+    "undercut_bias": 84,
+    "risk_tolerance": 83,
+    "tyre_focus": 86,
+    "weather_adaptability": 84
+  }
+]

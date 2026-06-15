@@ -7,7 +7,6 @@ import { StrategyIntelligence } from "@/components/landing/StrategyIntelligence"
 import { TelemetryIntelligence } from "@/components/landing/TelemetryIntelligence";
 import { SimulationEngine } from "@/components/landing/SimulationEngine";
 import { AIRaceEngineer } from "@/components/landing/AIRaceEngineer";
-import { CircuitIntelligence } from "@/components/landing/CircuitIntelligence";
 import { CTASection } from "@/components/landing/CTASection";
 
 export const Route = createFileRoute("/")({
@@ -15,7 +14,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "APEXiq · AI Race Strategy Intelligence" },
-      { name: "description", content: "AI-powered Formula 1 race strategy intelligence platform -- real-time telemetry, tyre degradation prediction, and pit strategy optimization." },
+      {
+        name: "description",
+        content:
+          "AI-powered Formula 1 race strategy intelligence platform -- real-time telemetry, tyre degradation prediction, and pit strategy optimization.",
+      },
     ],
   }),
 });
@@ -31,7 +34,6 @@ function LandingPage() {
         <TelemetryIntelligence />
         <SimulationEngine />
         <AIRaceEngineer />
-        <CircuitIntelligence />
         <CTASection />
       </main>
       <Footer />

@@ -1,12 +1,30 @@
 import { motion } from "framer-motion";
 
 const ITEMS = [
-  { title: "Tyre degradation", desc: "Stint-by-stint grip decay is non-linear and temperature-sensitive." },
-  { title: "Pit timing", desc: "Pit windows are constrained by traffic, tyre warm-up, and track position." },
-  { title: "Traffic", desc: "A clean rejoin can be worth more than raw pace — and it changes every lap." },
-  { title: "Weather", desc: "Track evolution shifts braking points, degradation, and crossover decisions." },
-  { title: "Safety cars", desc: "VSC/SC probabilities rewrite the optimal plan mid-stint." },
-  { title: "Outcome uncertainty", desc: "Strategy is a probability game — you need scenarios, not guesses." },
+  {
+    title: "Tyre degradation",
+    desc: "Stint-by-stint grip decay is non-linear and temperature-sensitive.",
+  },
+  {
+    title: "Pit timing",
+    desc: "Pit windows are constrained by traffic, tyre warm-up, and track position.",
+  },
+  {
+    title: "Traffic",
+    desc: "A clean rejoin can be worth more than raw pace — and it changes every lap.",
+  },
+  {
+    title: "Weather",
+    desc: "Track evolution shifts braking points, degradation, and crossover decisions.",
+  },
+  {
+    title: "Safety cars",
+    desc: "VSC/SC probabilities rewrite the optimal plan mid-stint.",
+  },
+  {
+    title: "Outcome uncertainty",
+    desc: "Strategy is a probability game — you need scenarios, not guesses.",
+  },
 ] as const;
 
 export function Problem() {
@@ -28,9 +46,10 @@ export function Problem() {
               Race strategy is a moving target.
             </h2>
             <p className="mt-5 text-[14px] md:text-[15px] text-muted-foreground leading-[1.8] max-w-2xl">
-              Every lap is a new constraint set — tyres, traffic, weather, and safety car risk. The job isn’t
-              “choose a plan”. It’s continuously comparing scenarios and executing the best option with the
-              least regret.
+              Every lap is a new constraint set — tyres, traffic, weather, and
+              safety car risk. The job isn’t “choose a plan”. It’s continuously
+              comparing scenarios and executing the best option with the least
+              regret.
             </p>
           </div>
 
@@ -47,7 +66,9 @@ export function Problem() {
                 <div className="font-rajdhani text-[12px] uppercase tracking-[0.14em] text-foreground">
                   {it.title}
                 </div>
-                <div className="mt-2 text-[13px] text-muted-foreground leading-[1.6]">{it.desc}</div>
+                <div className="mt-2 text-[13px] text-muted-foreground leading-[1.6]">
+                  {it.desc}
+                </div>
               </motion.div>
             ))}
           </div>

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Max Verstappen",
+    "team": "Red Bull",
+    "aggression": 98,
+    "tyre_management": 95,
+    "wet_weather": 92,
+    "overtaking": 97
+  },
+  {
+    "name": "Lewis Hamilton",
+    "team": "Ferrari",
+    "aggression": 88,
+    "tyre_management": 96,
+    "wet_weather": 99,
+    "overtaking": 94
+  },
+  {
+    "name": "Lando Norris",
+    "team": "McLaren",
+    "aggression": 90,
+    "tyre_management": 91,
+    "wet_weather": 87,
+    "overtaking": 89
+  }
+]
