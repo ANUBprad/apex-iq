@@ -12,7 +12,7 @@ from backend.app.api.schemas.dashboard import (
     StrategySummary,
     SimulationSummary,
     HistorySummary,
-    DashboardAggregateParams
+    DashboardAggregateRequest
 )
 
 class DashboardAggregatorService:
@@ -30,7 +30,7 @@ class DashboardAggregatorService:
         self.driver_repo = driver_repo
         self.team_repo = team_repo
 
-    async def get_dashboard_payload(self, params: DashboardAggregateParams) -> DashboardAggregateResponse:
+    async def get_dashboard_payload(self, params: DashboardAggregateRequest) -> DashboardAggregateResponse:
         """
         Orchestrates parallel data fetching from multiple domains to provide a 
         unified dashboard signal.

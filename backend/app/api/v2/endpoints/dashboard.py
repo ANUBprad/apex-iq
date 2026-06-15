@@ -3,7 +3,7 @@ from backend.app.api.deps import get_aggregator_service
 from backend.app.domains.dashboard.service import DashboardAggregatorService
 from backend.app.api.schemas.dashboard import (
     DashboardAggregateResponse,
-    DashboardAggregateParams
+    DashboardAggregateRequest
 )
 
 router = APIRouter()
@@ -23,7 +23,7 @@ async def get_session_summary(
     Fetches driver profile, team DNA, strategy recommendations, and 
     historical analysis in a single parallelized request.
     """
-    params = DashboardAggregateParams(
+    params = DashboardAggregateRequest(
         circuit_id=circuit_id,
         driver_id=driver_id,
         compound=compound,

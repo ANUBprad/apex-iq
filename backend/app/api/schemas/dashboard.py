@@ -40,7 +40,7 @@ class DashboardAggregateResponse(BaseModel):
     history: HistorySummary
     status: str = "success"
 
-class DashboardAggregateParams(BaseModel):
+class DashboardAggregateRequest(BaseModel):
     circuit_id: str = Field(..., description="Circuit slug")
     driver_id: str = Field(..., description="Driver slug")
     compound: str
