@@ -56,8 +56,8 @@ class RaceSession(Base):
     driver_id: Mapped[str] = mapped_column(ForeignKey("drivers.id"), init=True)
     
     start_time: Mapped[datetime] = mapped_column(DateTime, default_factory=datetime.utcnow, init=False)
-    status: Mapped[str] = mapped_column(String, default="LIVE", init=True) # LIVE, COMPLETED
     config: Mapped[Dict[str, Any]] = mapped_column(JSON, init=True) # compound, tyre_age, gaps, etc.
+    status: Mapped[str] = mapped_column(String, default="LIVE", init=True) # LIVE, COMPLETED
 
     circuit: Mapped["Circuit"] = relationship(back_populates="sessions", init=False)
     driver: Mapped["Driver"] = relationship(back_populates="sessions", init=False)
@@ -112,8 +112,8 @@ class HistoricalRace(Base):
     
     starting_grid: Mapped[Dict[str, Any]] = mapped_column(JSON, init=True)
     weather: Mapped[str] = mapped_column(String, init=True)
-    safety_cars: Mapped[int] = mapped_column(Integer, default=0, init=True)
     fastest_lap: Mapped[Optional[str]] = mapped_column(String, nullable=True, init=True)
     winning_gap: Mapped[Optional[float]] = mapped_column(Float, nullable=True, init=True)
     tyre_strategy: Mapped[Dict[str, Any]] = mapped_column(JSON, init=True)
     race_pace_metrics: Mapped[Dict[str, Any]] = mapped_column(JSON, init=True)
+    safety_cars: Mapped[int] = mapped_column(Integer, default=0, init=True)

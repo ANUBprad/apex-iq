@@ -8,150 +8,150 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as TelemetryRouteImport } from "./routes/telemetry";
-import { Route as SimulationsRouteImport } from "./routes/simulations";
-import { Route as DashboardRouteImport } from "./routes/dashboard";
-import { Route as CircuitsRouteImport } from "./routes/circuits";
-import { Route as AboutRouteImport } from "./routes/about";
-import { Route as IndexRouteImport } from "./routes/index";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as TelemetryRouteImport } from './routes/telemetry'
+import { Route as SimulationsRouteImport } from './routes/simulations'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CircuitsRouteImport } from './routes/circuits'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as IndexRouteImport } from './routes/index'
 
 const TelemetryRoute = TelemetryRouteImport.update({
-  id: "/telemetry",
-  path: "/telemetry",
+  id: '/telemetry',
+  path: '/telemetry',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SimulationsRoute = SimulationsRouteImport.update({
-  id: "/simulations",
-  path: "/simulations",
+  id: '/simulations',
+  path: '/simulations',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
-  id: "/dashboard",
-  path: "/dashboard",
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const CircuitsRoute = CircuitsRouteImport.update({
-  id: "/circuits",
-  path: "/circuits",
+  id: '/circuits',
+  path: '/circuits',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AboutRoute = AboutRouteImport.update({
-  id: "/about",
-  path: "/about",
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/about": typeof AboutRoute;
-  "/circuits": typeof CircuitsRoute;
-  "/dashboard": typeof DashboardRoute;
-  "/simulations": typeof SimulationsRoute;
-  "/telemetry": typeof TelemetryRoute;
+  '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/circuits': typeof CircuitsRoute
+  '/dashboard': typeof DashboardRoute
+  '/simulations': typeof SimulationsRoute
+  '/telemetry': typeof TelemetryRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/about": typeof AboutRoute;
-  "/circuits": typeof CircuitsRoute;
-  "/dashboard": typeof DashboardRoute;
-  "/simulations": typeof SimulationsRoute;
-  "/telemetry": typeof TelemetryRoute;
+  '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/circuits': typeof CircuitsRoute
+  '/dashboard': typeof DashboardRoute
+  '/simulations': typeof SimulationsRoute
+  '/telemetry': typeof TelemetryRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/about": typeof AboutRoute;
-  "/circuits": typeof CircuitsRoute;
-  "/dashboard": typeof DashboardRoute;
-  "/simulations": typeof SimulationsRoute;
-  "/telemetry": typeof TelemetryRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/circuits': typeof CircuitsRoute
+  '/dashboard': typeof DashboardRoute
+  '/simulations': typeof SimulationsRoute
+  '/telemetry': typeof TelemetryRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/about"
-    | "/circuits"
-    | "/dashboard"
-    | "/simulations"
-    | "/telemetry";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/about'
+    | '/circuits'
+    | '/dashboard'
+    | '/simulations'
+    | '/telemetry'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/about"
-    | "/circuits"
-    | "/dashboard"
-    | "/simulations"
-    | "/telemetry";
+    | '/'
+    | '/about'
+    | '/circuits'
+    | '/dashboard'
+    | '/simulations'
+    | '/telemetry'
   id:
-    | "__root__"
-    | "/"
-    | "/about"
-    | "/circuits"
-    | "/dashboard"
-    | "/simulations"
-    | "/telemetry";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/circuits'
+    | '/dashboard'
+    | '/simulations'
+    | '/telemetry'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  AboutRoute: typeof AboutRoute;
-  CircuitsRoute: typeof CircuitsRoute;
-  DashboardRoute: typeof DashboardRoute;
-  SimulationsRoute: typeof SimulationsRoute;
-  TelemetryRoute: typeof TelemetryRoute;
+  IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  CircuitsRoute: typeof CircuitsRoute
+  DashboardRoute: typeof DashboardRoute
+  SimulationsRoute: typeof SimulationsRoute
+  TelemetryRoute: typeof TelemetryRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/telemetry": {
-      id: "/telemetry";
-      path: "/telemetry";
-      fullPath: "/telemetry";
-      preLoaderRoute: typeof TelemetryRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/simulations": {
-      id: "/simulations";
-      path: "/simulations";
-      fullPath: "/simulations";
-      preLoaderRoute: typeof SimulationsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/dashboard": {
-      id: "/dashboard";
-      path: "/dashboard";
-      fullPath: "/dashboard";
-      preLoaderRoute: typeof DashboardRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/circuits": {
-      id: "/circuits";
-      path: "/circuits";
-      fullPath: "/circuits";
-      preLoaderRoute: typeof CircuitsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/about": {
-      id: "/about";
-      path: "/about";
-      fullPath: "/about";
-      preLoaderRoute: typeof AboutRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
+    '/telemetry': {
+      id: '/telemetry'
+      path: '/telemetry'
+      fullPath: '/telemetry'
+      preLoaderRoute: typeof TelemetryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulations': {
+      id: '/simulations'
+      path: '/simulations'
+      fullPath: '/simulations'
+      preLoaderRoute: typeof SimulationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/circuits': {
+      id: '/circuits'
+      path: '/circuits'
+      fullPath: '/circuits'
+      preLoaderRoute: typeof CircuitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -162,17 +162,17 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   SimulationsRoute: SimulationsRoute,
   TelemetryRoute: TelemetryRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from "./router.tsx";
-import type { startInstance } from "./start.ts";
-declare module "@tanstack/react-start" {
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
   interface Register {
-    ssr: true;
-    router: Awaited<ReturnType<typeof getRouter>>;
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>;
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }

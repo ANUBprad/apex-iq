@@ -14,7 +14,7 @@ import { RiskBreakdown } from "@/components/dashboard/RiskBreakdown";
 import { PitWindowVisualization } from "@/components/dashboard/PitWindowVisualization";
 import { StrategyTimeline } from "@/components/dashboard/StrategyTimeline";
 import { CircuitIntelligence } from "@/components/dashboard/CircuitIntelligence";
-import { useStrategy } from "@/hooks/useStrategy";
+import { useUnifiedDashboard } from "@/hooks/useUnifiedDashboard";
 import type { StrategyInput } from "@/lib/api";
 import { CIRCUITS } from "@/lib/apex-data";
 import { ScenarioLab } from "@/components/dashboard/ScenarioLab";
@@ -35,10 +35,9 @@ import { TeamStrategyDNA } from "@/components/dashboard/TeamStrategyDNA";
 import { StrategyLearningCenter } from "@/components/dashboard/StrategyLearningCenter";
 
 import { AIStrategyCore } from "@/components/dashboard/AIStrategyCore";
-import { useDriverProfile } from "@/hooks/useDriverProfile";
-import { useTeamDNA } from "@/hooks/useTeamDNA";
 import { useHistoricalComparison } from "@/hooks/useHistoricalComparison";
 import { useStrategyLearning } from "@/hooks/useStrategyLearning";
+import type { DriverProfile, TeamDNA } from "@/lib/api";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
@@ -56,6 +55,7 @@ export const Route = createFileRoute("/dashboard")({
 
 function DashboardPage() {
   const {
+    aggregator,
     strategy,
     simulation,
     comparison,
@@ -66,7 +66,7 @@ function DashboardPage() {
     loading,
     error,
     run,
-  } = useStrategy();
+  } = useUnifiedDashboard();
   const [session, setSession] = useState<StrategyInput | null>(null);
   const [replayLap, setReplayLap] = useState(1);
 
@@ -83,8 +83,28 @@ function DashboardPage() {
     ? currentLap + session.laps_remaining
     : circuit.laps;
 
-  const driverProfile = useDriverProfile("Max Verstappen");
-  const teamDNA = useTeamDNA("Red Bull");
+  const driverProfile: DriverProfile | null = aggregator?.driver
+    ? {
+        name: aggregator.driver.name,
+        aggression: aggregator.driver.aggression,
+        consistency: aggregator.driver.consistency,
+        team: aggregator.team?.name ?? "",
+        tyre_management: 50,
+        overtake_efficiency: 50,
+        wet_weather_skill: 50,
+        racecraft: 50,
+      }
+    : null;
+  const teamDNA: TeamDNA | null = aggregator?.team
+    ? {
+        name: aggregator.team.name,
+        aggression: 50,
+        undercut_bias: 50,
+        risk_tolerance: aggregator.team.risk_tolerance,
+        tyre_focus: 50,
+        weather_adaptability: 50,
+      }
+    : null;
   const { data: historicalComparison } = useHistoricalComparison(
     session?.circuit ?? "Monaco",
     comparison?.recommended_strategy ?? "",
@@ -95,7 +115,7 @@ function DashboardPage() {
   );
 
   const replay = useReplayRace();
-  console.log({ strategy, simulation, comparison });
+  console.log({ strategy, simulation, comparison, aggregator });
 
   return (
     <div className="dark min-h-screen bg-[#0A0A0F] text-[#F9FAFB]">

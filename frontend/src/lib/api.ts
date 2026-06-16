@@ -10,6 +10,7 @@ export interface StrategyInput {
   compound: string;
   tyre_age: number;
   circuit: string;
+  driver?: string;
   gap_ahead: number;
   gap_behind: number;
   fuel_load?: number;
