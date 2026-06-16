@@ -21,9 +21,11 @@ from backend.services.strategy_learning import (store_scenario, analyze_similar_
 from backend.services.ai_strategy_core import compute_ai_strategy
 
 from backend.app.api.v2.endpoints.dashboard import router as dashboard_v2_router
+from backend.app.api.v2.endpoints.simulations import router as simulations_v2_router
 
 app = FastAPI(title="F1 AI Race Engineer API", version="1.0")
 app.include_router(dashboard_v2_router, prefix="/api/v2/dashboard", tags=["Dashboard V2"])
+app.include_router(simulations_v2_router, prefix="/api/v2/simulations", tags=["Simulations V2"])
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 

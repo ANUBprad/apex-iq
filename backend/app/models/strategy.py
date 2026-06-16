@@ -1,7 +1,8 @@
+import enum
 from datetime import datetime
 from uuid import UUID, uuid4
 from typing import List, Optional, Dict, Any
-from sqlalchemy import ForeignKey, String, Integer, Float, DateTime, JSON
+from sqlalchemy import ForeignKey, String, Integer, Float, DateTime, JSON, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.app.models.base import Base
@@ -81,6 +82,25 @@ class SimulationResult(Base):
     raw_output: Mapped[Dict[str, Any]] = mapped_column(JSON, init=True)
 
     session: Mapped["RaceSession"] = relationship(back_populates="simulations", init=False)
+
+class JobStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+class SimulationJob(Base):
+    __tablename__ = "simulation_jobs"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default_factory=uuid4, init=False)
+    params: Mapped[Dict[str, Any]] = mapped_column(JSON, init=True)
+    result_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("simulation_results.id"), nullable=True, default=None, init=True)
+    error_message: Mapped[Optional[str]] = mapped_column(String, nullable=True, default=None, init=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True, default=None, init=True)
+    status: Mapped[JobStatus] = mapped_column(SAEnum(JobStatus), default=JobStatus.PENDING, init=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default_factory=datetime.utcnow, init=False)
+
+    result: Mapped[Optional["SimulationResult"]] = relationship(init=False)
 
 class StrategyMemory(Base):
     __tablename__ = "strategy_memory"

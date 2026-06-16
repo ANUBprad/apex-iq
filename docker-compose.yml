@@ -16,6 +16,17 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: apexiq-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   api:
     build: 
       context: ./backend
@@ -24,11 +35,33 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       - DATABASE_URL=postgresql+asyncpg://apexiq:apexiq_pass@db:5432/apexiq
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - VITE_API_URL=http://localhost:8000
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+  worker:
+    build: 
+      context: ./backend
+      dockerfile: ../docker/backend.Dockerfile
+    container_name: apexiq-worker
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://apexiq:apexiq_pass@db:5432/apexiq
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    command: celery -A backend.app.celery_app worker --loglevel=info --concurrency=1
     volumes:
       - ./backend:/app
 
