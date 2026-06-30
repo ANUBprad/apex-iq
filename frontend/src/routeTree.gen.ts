@@ -10,9 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TelemetryRouteImport } from './routes/telemetry'
-import { Route as SimulationsRouteImport } from './routes/simulations'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as CircuitsRouteImport } from './routes/circuits'
+import { Route as StrategyLabRouteImport } from './routes/strategy-lab'
+import { Route as SimulationRouteImport } from './routes/simulation'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as RaceCenterRouteImport } from './routes/race-center'
+import { Route as MemoryRouteImport } from './routes/memory'
+import { Route as KnowledgeRouteImport } from './routes/knowledge'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as AiEngineerRouteImport } from './routes/ai-engineer'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -21,19 +26,44 @@ const TelemetryRoute = TelemetryRouteImport.update({
   path: '/telemetry',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SimulationsRoute = SimulationsRouteImport.update({
-  id: '/simulations',
-  path: '/simulations',
+const StrategyLabRoute = StrategyLabRouteImport.update({
+  id: '/strategy-lab',
+  path: '/strategy-lab',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const SimulationRoute = SimulationRouteImport.update({
+  id: '/simulation',
+  path: '/simulation',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CircuitsRoute = CircuitsRouteImport.update({
-  id: '/circuits',
-  path: '/circuits',
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RaceCenterRoute = RaceCenterRouteImport.update({
+  id: '/race-center',
+  path: '/race-center',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemoryRoute = MemoryRouteImport.update({
+  id: '/memory',
+  path: '/memory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KnowledgeRoute = KnowledgeRouteImport.update({
+  id: '/knowledge',
+  path: '/knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiEngineerRoute = AiEngineerRouteImport.update({
+  id: '/ai-engineer',
+  path: '/ai-engineer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -50,26 +80,41 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/circuits': typeof CircuitsRoute
-  '/dashboard': typeof DashboardRoute
-  '/simulations': typeof SimulationsRoute
+  '/ai-engineer': typeof AiEngineerRoute
+  '/analytics': typeof AnalyticsRoute
+  '/knowledge': typeof KnowledgeRoute
+  '/memory': typeof MemoryRoute
+  '/race-center': typeof RaceCenterRoute
+  '/settings': typeof SettingsRoute
+  '/simulation': typeof SimulationRoute
+  '/strategy-lab': typeof StrategyLabRoute
   '/telemetry': typeof TelemetryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/circuits': typeof CircuitsRoute
-  '/dashboard': typeof DashboardRoute
-  '/simulations': typeof SimulationsRoute
+  '/ai-engineer': typeof AiEngineerRoute
+  '/analytics': typeof AnalyticsRoute
+  '/knowledge': typeof KnowledgeRoute
+  '/memory': typeof MemoryRoute
+  '/race-center': typeof RaceCenterRoute
+  '/settings': typeof SettingsRoute
+  '/simulation': typeof SimulationRoute
+  '/strategy-lab': typeof StrategyLabRoute
   '/telemetry': typeof TelemetryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/circuits': typeof CircuitsRoute
-  '/dashboard': typeof DashboardRoute
-  '/simulations': typeof SimulationsRoute
+  '/ai-engineer': typeof AiEngineerRoute
+  '/analytics': typeof AnalyticsRoute
+  '/knowledge': typeof KnowledgeRoute
+  '/memory': typeof MemoryRoute
+  '/race-center': typeof RaceCenterRoute
+  '/settings': typeof SettingsRoute
+  '/simulation': typeof SimulationRoute
+  '/strategy-lab': typeof StrategyLabRoute
   '/telemetry': typeof TelemetryRoute
 }
 export interface FileRouteTypes {
@@ -77,34 +122,54 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/circuits'
-    | '/dashboard'
-    | '/simulations'
+    | '/ai-engineer'
+    | '/analytics'
+    | '/knowledge'
+    | '/memory'
+    | '/race-center'
+    | '/settings'
+    | '/simulation'
+    | '/strategy-lab'
     | '/telemetry'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/circuits'
-    | '/dashboard'
-    | '/simulations'
+    | '/ai-engineer'
+    | '/analytics'
+    | '/knowledge'
+    | '/memory'
+    | '/race-center'
+    | '/settings'
+    | '/simulation'
+    | '/strategy-lab'
     | '/telemetry'
   id:
     | '__root__'
     | '/'
     | '/about'
-    | '/circuits'
-    | '/dashboard'
-    | '/simulations'
+    | '/ai-engineer'
+    | '/analytics'
+    | '/knowledge'
+    | '/memory'
+    | '/race-center'
+    | '/settings'
+    | '/simulation'
+    | '/strategy-lab'
     | '/telemetry'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  CircuitsRoute: typeof CircuitsRoute
-  DashboardRoute: typeof DashboardRoute
-  SimulationsRoute: typeof SimulationsRoute
+  AiEngineerRoute: typeof AiEngineerRoute
+  AnalyticsRoute: typeof AnalyticsRoute
+  KnowledgeRoute: typeof KnowledgeRoute
+  MemoryRoute: typeof MemoryRoute
+  RaceCenterRoute: typeof RaceCenterRoute
+  SettingsRoute: typeof SettingsRoute
+  SimulationRoute: typeof SimulationRoute
+  StrategyLabRoute: typeof StrategyLabRoute
   TelemetryRoute: typeof TelemetryRoute
 }
 
@@ -117,25 +182,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TelemetryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/simulations': {
-      id: '/simulations'
-      path: '/simulations'
-      fullPath: '/simulations'
-      preLoaderRoute: typeof SimulationsRouteImport
+    '/strategy-lab': {
+      id: '/strategy-lab'
+      path: '/strategy-lab'
+      fullPath: '/strategy-lab'
+      preLoaderRoute: typeof StrategyLabRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/simulation': {
+      id: '/simulation'
+      path: '/simulation'
+      fullPath: '/simulation'
+      preLoaderRoute: typeof SimulationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/circuits': {
-      id: '/circuits'
-      path: '/circuits'
-      fullPath: '/circuits'
-      preLoaderRoute: typeof CircuitsRouteImport
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/race-center': {
+      id: '/race-center'
+      path: '/race-center'
+      fullPath: '/race-center'
+      preLoaderRoute: typeof RaceCenterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/memory': {
+      id: '/memory'
+      path: '/memory'
+      fullPath: '/memory'
+      preLoaderRoute: typeof MemoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/knowledge': {
+      id: '/knowledge'
+      path: '/knowledge'
+      fullPath: '/knowledge'
+      preLoaderRoute: typeof KnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-engineer': {
+      id: '/ai-engineer'
+      path: '/ai-engineer'
+      fullPath: '/ai-engineer'
+      preLoaderRoute: typeof AiEngineerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -158,9 +258,14 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  CircuitsRoute: CircuitsRoute,
-  DashboardRoute: DashboardRoute,
-  SimulationsRoute: SimulationsRoute,
+  AiEngineerRoute: AiEngineerRoute,
+  AnalyticsRoute: AnalyticsRoute,
+  KnowledgeRoute: KnowledgeRoute,
+  MemoryRoute: MemoryRoute,
+  RaceCenterRoute: RaceCenterRoute,
+  SettingsRoute: SettingsRoute,
+  SimulationRoute: SimulationRoute,
+  StrategyLabRoute: StrategyLabRoute,
   TelemetryRoute: TelemetryRoute,
 }
 export const routeTree = rootRouteImport

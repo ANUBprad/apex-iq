@@ -1,0 +1,16 @@
+[
+  {
+    "circuit": "Monaco",
+    "tyre": "soft",
+    "lap": 18,
+    "strategy": "underCut",
+    "outcome": "P3"
+  },
+  {
+    "circuit": "Monaco",
+    "tyre": "soft",
+    "lap": 18,
+    "strategy": "underCut",
+    "outcome": "P3"
+  }
+]

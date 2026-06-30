@@ -1,120 +1,252 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { ChevronRight, Cpu, Radio, Timer } from "lucide-react";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { createFileRoute } from "@tanstack/react-router";
+import { FloatingPanel, StatusDot } from "@/components/f1";
+import { useSystemHealthQuery } from "@/hooks/useApiQueries";
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.04 },
+  },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: [0.19, 1, 0.22, 1] },
+  },
+};
+
+const slideIn = {
+  hidden: { opacity: 0, x: -20 },
+  show: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.4, ease: [0.19, 1, 0.22, 1] },
+  },
+};
+
+function formatUptime(seconds: number): string {
+  const d = Math.floor(seconds / 86400);
+  const h = Math.floor((seconds % 86400) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const parts: string[] = [];
+  if (d > 0) parts.push(`${d}d`);
+  if (h > 0) parts.push(`${h}h`);
+  parts.push(`${m}m`);
+  return parts.join(" ");
+}
+
+const techStack = [
+  "React 19",
+  "TypeScript",
+  "TanStack Router",
+  "TanStack Query",
+  "Framer Motion",
+  "Tailwind CSS",
+  "FastAPI",
+  "LangGraph",
+  "LangChain",
+  "Python 3.12",
+  "ChromaDB",
+  "Redis",
+  "Docker",
+];
+
+const versionHistory = [
+  {
+    version: "v2.5.0",
+    date: "2026-06-15",
+    description:
+      "Real-time pipeline health monitoring, V3 intelligence RAG memory, multi-agent orchestration.",
+  },
+  {
+    version: "v2.4.0",
+    date: "2026-05-01",
+    description:
+      "Monte Carlo simulations, race outcome predictions, wet-weather strategy engine.",
+  },
+  {
+    version: "v2.3.0",
+    date: "2026-03-20",
+    description:
+      "Pit window analysis, undercut detection, historical comparison dashboard.",
+  },
+  {
+    version: "v2.2.0",
+    date: "2026-02-10",
+    description:
+      "Driver & team profiling, safety car analysis, replay intelligence.",
+  },
+  {
+    version: "v2.1.0",
+    date: "2026-01-05",
+    description:
+      "Strategy timeline visualisation, confidence scoring, tyre degradation curves.",
+  },
+  {
+    version: "v2.0.0",
+    date: "2025-12-01",
+    description:
+      "Complete UI overhaul with F1 design system, realtime dashboards, API v2.",
+  },
+  {
+    version: "v1.0.0",
+    date: "2025-10-15",
+    description:
+      "Initial release — core strategy engine, basic dashboards, circuit catalogue.",
+  },
+];
+
+function AboutPage() {
+  const { data: health } = useSystemHealthQuery();
+
+  return (
+    <div className="min-h-screen carbon-fiber">
+      <div className="ambient-glow-right pointer-events-none fixed inset-0" />
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="relative z-[1] p-5 space-y-4"
+      >
+        <motion.div variants={slideIn} className="mb-1">
+          <h1 className="text-[28px] font-bold tracking-tight text-white">
+            About
+          </h1>
+          <p className="text-[13px] text-[#999999] mt-0.5">
+            APEXiq — AI-powered F1 intelligence platform
+          </p>
+        </motion.div>
+
+        {/* System Health */}
+        <motion.div variants={fadeUp} whileHover={{ y: -2 }}>
+          <FloatingPanel title="System Health" variant="glow-red">
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="space-y-2"
+            >
+              <motion.div variants={fadeUp} className="flex items-center gap-2">
+                <StatusDot
+                  color={health?.status === "healthy" ? "green" : "red"}
+                  size="lg"
+                />
+                <span className="text-sm text-white font-medium capitalize">
+                  {health?.status ?? "loading..."}
+                </span>
+              </motion.div>
+              <motion.div
+                variants={fadeUp}
+                className="flex items-baseline gap-6 text-[13px]"
+              >
+                <div>
+                  <span className="text-[#666666]">Version</span>{" "}
+                  <span className="tabular-nums font-mono text-white">
+                    {health?.version ?? "—"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#666666]">Uptime</span>{" "}
+                  <span className="tabular-nums font-mono text-white">
+                    {health?.uptime != null ? formatUptime(health.uptime) : "—"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#666666]">Endpoints</span>{" "}
+                  <span className="tabular-nums font-mono text-white">
+                    {health?.endpoints ?? "—"}
+                  </span>
+                </div>
+              </motion.div>
+            </motion.div>
+          </FloatingPanel>
+        </motion.div>
+
+        {/* Technology Stack */}
+        <motion.div variants={fadeUp} whileHover={{ y: -2 }}>
+          <FloatingPanel title="Technology Stack" variant="default">
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="flex flex-wrap gap-x-5 gap-y-1"
+            >
+              {techStack.map((tech) => (
+                <motion.span
+                  key={tech}
+                  variants={fadeUp}
+                  className="text-[13px] text-[#CCCCCC]"
+                >
+                  {tech}
+                </motion.span>
+              ))}
+            </motion.div>
+          </FloatingPanel>
+        </motion.div>
+
+        {/* Version History */}
+        <motion.div variants={fadeUp} whileHover={{ y: -2 }}>
+          <FloatingPanel title="Version History" variant="default">
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="space-y-2"
+            >
+              {versionHistory.map((entry) => (
+                <motion.div
+                  key={entry.version}
+                  variants={fadeUp}
+                  className="flex items-start gap-3 pb-2 border-b border-[#262626] last:border-0"
+                >
+                  <span className="tabular-nums font-mono text-[13px] text-[#E10600] shrink-0 w-[4.5rem]">
+                    {entry.version}
+                  </span>
+                  <span className="tabular-nums font-mono text-[11px] text-[#666666] shrink-0 w-[5.5rem] pt-0.5">
+                    {entry.date}
+                  </span>
+                  <span className="text-[13px] text-[#CCCCCC] leading-snug">
+                    {entry.description}
+                  </span>
+                </motion.div>
+              ))}
+            </motion.div>
+          </FloatingPanel>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/about")({
-  component: EngineeringBriefPage,
+  component: AboutPage,
   head: () => ({
     meta: [
-      { title: "APEXiq · Engineering Brief" },
+      { title: "APEXiq · About" },
       {
         name: "description",
         content:
-          "Engineering brief for the APEXiq strategy OS — how the system turns telemetry and constraints into actionable race calls.",
+          "About APEXiq — AI race intelligence operating system. System architecture, version history, and tech stack.",
+      },
+      { property: "og:title", content: "APEXiq · About" },
+      {
+        property: "og:description",
+        content:
+          "About APEXiq — AI race intelligence operating system. System architecture, version history, and tech stack.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "APEXiq · About" },
+      {
+        name: "twitter:description",
+        content:
+          "About APEXiq — AI race intelligence operating system. System architecture, version history, and tech stack.",
       },
     ],
   }),
 });
-
-function EngineeringBriefPage() {
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Navbar />
-      <main className="pt-20 px-4 max-w-[1200px] mx-auto pb-16">
-        <motion.section
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="rounded-lg border border-border bg-card/60 backdrop-blur p-6 md:p-10 mb-8"
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md border border-border bg-background/40 mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-electric/80" />
-            <span className="font-rajdhani text-[11px] tracking-[0.22em] text-muted-foreground uppercase font-semibold">
-              Engineering Brief
-            </span>
-          </div>
-
-          <h1 className="font-orbitron font-semibold text-[34px] md:text-[52px] leading-[0.98] tracking-[-0.03em] text-foreground">
-            How APEXiq
-            <br />
-            turns chaos into calls
-          </h1>
-
-          <p className="mt-5 text-[14px] text-muted-foreground leading-[1.8] max-w-2xl">
-            APEXiq is designed like pit wall software: inputs, constraints,
-            scenarios, and a clear recommendation. It’s not a marketing
-            dashboard and it’s not a chat UI — it’s a decision surface.
-          </p>
-        </motion.section>
-
-        <section className="mb-10">
-          <div className="text-[14px] font-semibold text-foreground mb-4">
-            Control Loop
-          </div>
-          <div className="rounded-lg border border-border bg-card/60 backdrop-blur p-5 md:p-6">
-            <div className="flex flex-wrap items-center gap-2">
-              {[
-                {
-                  name: "Telemetry",
-                  icon: Radio,
-                  border: "border-[rgba(0,217,255,0.22)]",
-                  bg: "bg-[rgba(0,217,255,0.06)]",
-                  text: "text-cyan-electric",
-                },
-                {
-                  name: "Feature Store",
-                  icon: Cpu,
-                  border: "border-border",
-                  bg: "bg-background/40",
-                  text: "text-muted-foreground",
-                },
-                {
-                  name: "Simulation",
-                  icon: Timer,
-                  border: "border-[rgba(220,20,60,0.25)]",
-                  bg: "bg-[rgba(220,20,60,0.08)]",
-                  text: "text-red-ferrari",
-                },
-                {
-                  name: "Recommendation",
-                  icon: ChevronRight,
-                  border: "border-border",
-                  bg: "bg-background/40",
-                  text: "text-muted-foreground",
-                },
-              ].map((n, i, a) => (
-                <div key={n.name} className="flex items-center gap-2">
-                  <div
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-md border ${n.border} ${n.bg}`}
-                  >
-                    <n.icon
-                      className={`w-3.5 h-3.5 ${n.text}`}
-                      strokeWidth={1.8}
-                    />
-                    <span className="font-grotesk text-[13px] font-medium">
-                      {n.name}
-                    </span>
-                  </div>
-                  {i < a.length - 1 && (
-                    <ChevronRight
-                      className="w-3 h-3 text-border"
-                      strokeWidth={2}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-            <p className="mt-5 text-[13px] text-muted-foreground leading-[1.75] max-w-2xl">
-              Telemetry streams in, constraints are applied (traffic, weather,
-              safety car risk), scenarios are simulated, and a ranked strategy
-              recommendation is surfaced as a single call you can execute.
-            </p>
-          </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
-  );
-}

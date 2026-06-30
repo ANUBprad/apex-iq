@@ -1,0 +1,23 @@
+{
+  "victory_model": {
+    "version": "1.0.0",
+    "trained_at": "2026-06-17T20:33:16.457320",
+    "dataset_rows": 156,
+    "auc": 0.8316522366522368,
+    "path": "backend/models/victory_model.pkl"
+  },
+  "podium_model": {
+    "version": "1.0.0",
+    "trained_at": "2026-06-17T20:33:16.767537",
+    "dataset_rows": 156,
+    "auc": 0.6787464985994399,
+    "path": "backend/models/podium_model.pkl"
+  },
+  "top5_model": {
+    "version": "1.0.0",
+    "trained_at": "2026-06-17T20:33:17.072454",
+    "dataset_rows": 156,
+    "auc": 0.6346681096681097,
+    "path": "backend/models/top5_model.pkl"
+  }
+}

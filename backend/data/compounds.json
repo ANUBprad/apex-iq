@@ -1,0 +1,7 @@
+[
+  {"id":"SOFT","color":"#EF4444","label":"SOFT","shortLabel":"S","degRate":0.12,"gripBase":98.4,"stintWindow":[8,18],"description":"Optimal for qualifying, high initial grip, rapid degradation"},
+  {"id":"MEDIUM","color":"#F59E0B","label":"MED","shortLabel":"M","degRate":0.08,"gripBase":96.8,"stintWindow":[14,28],"description":"Balanced performance and durability, versatile race tyre"},
+  {"id":"HARD","color":"#6B7280","label":"HARD","shortLabel":"H","degRate":0.05,"gripBase":95.2,"stintWindow":[22,40],"description":"Maximum durability, lower peak grip, extended stints"},
+  {"id":"INTER","color":"#10B981","label":"INTER","shortLabel":"I","degRate":0.15,"gripBase":94.0,"stintWindow":[10,20],"description":"Intermediate wet tyre, optimal for light rain conditions"},
+  {"id":"WET","color":"#0EA5E9","label":"WET","shortLabel":"W","degRate":0.18,"gripBase":92.0,"stintWindow":[8,16],"description":"Full wet tyre, maximum water displacement, reduced grip"}
+]

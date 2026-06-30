@@ -64,8 +64,8 @@ async def _execute_job(job_id: UUID, params: dict):
             elapsed_ms = int(time.time() * 1000) - start_ms
 
             race_session = RaceSession(
-                circuit_id=params.get("circuit_id", "monaco"),
-                driver_id=params.get("driver_id", "charles-leclerc"),
+                circuit_id=params.get("circuit_id"),
+                driver_id=params.get("driver_id"),
                 config={},
             )
             session.add(race_session)

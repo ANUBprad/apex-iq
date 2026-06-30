@@ -5,15 +5,18 @@ from datetime import datetime
 
 
 class SimulationRunRequest(BaseModel):
-    circuit_id: str = Field(..., description="Circuit slug")
-    driver_id: str = Field(..., description="Driver slug")
+    circuit_id: Optional[str] = Field(default=None, description="Circuit slug (contextual metadata)")
+    driver_id: Optional[str] = Field(default=None, description="Driver slug (contextual metadata)")
     compound: str = Field(..., description="Tyre compound")
     tyre_age: int = Field(..., ge=0)
     laps_remaining: int = Field(..., ge=1)
+    base_position: int = Field(..., ge=1)
     gap_ahead: float = Field(default=0.0)
     gap_behind: float = Field(default=0.0)
-    base_position: int = Field(default=3, ge=1)
     iterations: int = Field(default=1000, ge=100, le=100_000)
+    degradation_rate: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    weather_factor: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    fuel_load: Optional[float] = Field(default=None, ge=0.0)
 
 
 class SimulationRunResponse(BaseModel):

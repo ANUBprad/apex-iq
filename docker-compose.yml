@@ -3,15 +3,15 @@ services:
     image: postgres:16-alpine
     container_name: apexiq-db
     environment:
-      - POSTGRES_USER=apexiq
-      - POSTGRES_PASSWORD=apexiq_pass
-      - POSTGRES_DB=apexiq
+      - POSTGRES_USER=${POSTGRES_USER:-apexiq}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-apexiq_pass}
+      - POSTGRES_DB=${POSTGRES_DB:-apexiq}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U apexiq"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-apexiq}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -20,7 +20,7 @@ services:
     image: redis:7-alpine
     container_name: apexiq-redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -29,8 +29,8 @@ services:
 
   api:
     build: 
-      context: ./backend
-      dockerfile: ../docker/backend.Dockerfile
+      context: .
+      dockerfile: docker/backend.Dockerfile
     container_name: apexiq-api
     depends_on:
       db:
@@ -38,19 +38,21 @@ services:
       redis:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgresql+asyncpg://apexiq:apexiq_pass@db:5432/apexiq
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - VITE_API_URL=http://localhost:8000
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://apexiq:apexiq_pass@db:5432/apexiq}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/0}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:8000}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
     ports:
-      - "8000:8000"
+      - "${API_PORT:-8000}:8000"
     volumes:
       - ./backend:/app
+    restart: unless-stopped
 
   worker:
     build: 
-      context: ./backend
-      dockerfile: ../docker/backend.Dockerfile
+      context: .
+      dockerfile: docker/backend.Dockerfile
     container_name: apexiq-worker
     depends_on:
       db:
@@ -58,12 +60,40 @@ services:
       redis:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgresql+asyncpg://apexiq:apexiq_pass@db:5432/apexiq
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://apexiq:apexiq_pass@db:5432/apexiq}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/0}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
     command: celery -A backend.app.celery_app worker --loglevel=info --concurrency=1
     volumes:
       - ./backend:/app
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    container_name: apexiq-frontend
+    depends_on:
+      - api
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3000
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: apexiq-nginx
+    depends_on:
+      - frontend
+      - api
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf
+    restart: unless-stopped
 
 volumes:
   postgres_data:
