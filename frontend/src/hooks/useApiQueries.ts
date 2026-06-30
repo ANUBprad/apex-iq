@@ -31,6 +31,9 @@ import {
   getMetrics,
   getMemoryEntries,
   getRaceOrder,
+  getDrivers,
+  getTeams,
+  getWeatherOptions,
   type MetricsResponse,
   type CircuitData,
   type RaceOrderResponse,
@@ -61,10 +64,18 @@ import {
   type LearningResponse,
   type HistoricalRace,
   type MemoryListResponse,
+  type DriverData,
+  type TeamData,
   getPipelineHealth,
   type PipelineHealthResponse,
   getSystemHealth,
   type SystemHealthResponse,
+  getTelemetryLive,
+  getTelemetryHistory,
+  type TelemetrySnapshot,
+  aiEngineerChat,
+  type AIEngineerRequest,
+  type AIEngineerResponse,
 } from "@/lib/api";
 
 // ─── V2 Dashboard ──────────────────────────────────────────────────────────
@@ -281,7 +292,39 @@ export function useReplayIntelligenceQuery(lap: number, totalLaps: number) {
     queryFn: () => getReplayIntelligence(lap, totalLaps),
     enabled: lap > 0 && totalLaps > 0,
     retry: 1,
-    staleTime: 60_000,
+    staleTime: 15_000,
+  });
+}
+
+// ─── Telemetry Queries ───────────────────────────────────────────────────
+
+export function useTelemetryLiveQuery(enabled = true) {
+  return useQuery<TelemetrySnapshot>({
+    queryKey: ["telemetry-live"],
+    queryFn: () => getTelemetryLive(),
+    enabled,
+    refetchInterval: 1000,
+    retry: 2,
+    staleTime: 500,
+  });
+}
+
+export function useTelemetryHistoryQuery(count = 60, enabled = true) {
+  return useQuery<TelemetrySnapshot[]>({
+    queryKey: ["telemetry-history", count],
+    queryFn: () => getTelemetryHistory(count),
+    enabled,
+    refetchInterval: 2000,
+    retry: 1,
+    staleTime: 1000,
+  });
+}
+
+// ─── AI Engineer ─────────────────────────────────────────────────────────
+
+export function useAIEngineerChat() {
+  return useMutation<AIEngineerResponse, Error, AIEngineerRequest>({
+    mutationFn: (payload) => aiEngineerChat(payload),
   });
 }
 
@@ -397,5 +440,74 @@ export function useSystemHealthQuery() {
     staleTime: 30_000,
     retry: 2,
     refetchInterval: 60_000,
+  });
+}
+
+// ─── Strategy Lab Queries ─────────────────────────────────────────────────
+
+export function useDriversQuery() {
+  return useQuery<DriverData[]>({
+    queryKey: ["drivers"],
+    queryFn: () => getDrivers(),
+    staleTime: 600_000,
+    retry: 2,
+  });
+}
+
+export function useTeamsQuery() {
+  return useQuery<TeamData[]>({
+    queryKey: ["teams"],
+    queryFn: () => getTeams(),
+    staleTime: 600_000,
+    retry: 2,
+  });
+}
+
+export function useWeatherOptionsQuery() {
+  return useQuery<string[]>({
+    queryKey: ["weather-options"],
+    queryFn: () => getWeatherOptions(),
+    staleTime: 600_000,
+    retry: 2,
+  });
+}
+
+export function useMonteCarloQuery(params: StrategyInput, enabled = true) {
+  return useQuery<MonteCarloResponse>({
+    queryKey: ["monte-carlo", params],
+    queryFn: () => getMonteCarlo(params),
+    enabled,
+    retry: 1,
+    staleTime: 15_000,
+  });
+}
+
+export function useRaceOutcomeQuery(params: StrategyInput, enabled = true) {
+  return useQuery<RaceOutcomeResponse>({
+    queryKey: ["race-outcome", params],
+    queryFn: () => getRaceOutcome(params),
+    enabled,
+    retry: 1,
+    staleTime: 15_000,
+  });
+}
+
+export function useSafetyCarQueryEnabled(params: StrategyInput, enabled = true) {
+  return useQuery<SafetyCarResponse>({
+    queryKey: ["safety-car-lab", params],
+    queryFn: () => getSafetyCarAnalysis(params),
+    enabled,
+    retry: 1,
+    staleTime: 15_000,
+  });
+}
+
+export function useSimulationQueryEnabled(params: StrategyInput, enabled = true) {
+  return useQuery<SimulationResponse>({
+    queryKey: ["simulation-lab", params],
+    queryFn: () => getSimulation(params),
+    enabled,
+    retry: 1,
+    staleTime: 15_000,
   });
 }

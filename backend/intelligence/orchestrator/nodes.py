@@ -14,7 +14,8 @@ from backend.intelligence.orchestrator.router import get_strategy_params
 def rag_node(state: Dict[str, Any]) -> Dict[str, Any]:
     circuit = state.get("circuit", "")
     weather = state.get("weather", "dry")
-    query = f"{circuit} {weather} race strategy"
+    user_query = state.get("query", "")
+    query = user_query if user_query else f"{circuit} {weather} race strategy"
     retrieved = retrieve_context(query, n_results=8, circuit=circuit)
     context = build_context(retrieved, query)
     return {"rag_context": context, "node_history": ["rag"]}

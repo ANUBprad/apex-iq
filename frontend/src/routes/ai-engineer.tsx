@@ -1,8 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FloatingPanel, ConfidenceMeter } from "@/components/f1";
+import { FloatingPanel, ConfidenceMeter, CardSkeleton } from "@/components/f1";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useRef, useEffect } from "react";
-import { useV3Query, useV3MetricsQuery } from "@/hooks/useApiQueries";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import {
+  useAIEngineerChat,
+  useV3MetricsQuery,
+  useCircuitsQuery,
+  useTelemetryLiveQuery,
+} from "@/hooks/useApiQueries";
+import type { AIEngineerResponse } from "@/lib/api";
 
 const container = {
   hidden: { opacity: 0 },
@@ -29,35 +35,18 @@ export const Route = createFileRoute("/ai-engineer")({
       {
         name: "description",
         content:
-          "AI-powered F1 race engineer console. Ask questions, get strategy recommendations, and explore reasoning chains.",
-      },
-      { property: "og:title", content: "APEXiq · AI Engineer" },
-      {
-        property: "og:description",
-        content:
-          "AI-powered F1 race engineer console. Ask questions, get strategy recommendations, and explore reasoning chains.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "APEXiq · AI Engineer" },
-      {
-        name: "twitter:description",
-        content:
-          "AI-powered F1 race engineer console. Ask questions, get strategy recommendations, and explore reasoning chains.",
+          "AI-powered F1 race engineer console with multi-agent intelligence pipeline, conversation memory, and live telemetry context.",
       },
     ],
   }),
 });
 
-type ChatMessage = { role: "engineer" | "user"; msg: string; time: string };
-
-function createInitialMessage(): ChatMessage {
-  return {
-    role: "engineer",
-    msg: "APEXiq AI Engineer initialized. All systems nominal. How can I assist with race strategy today?",
-    time: "",
-  };
-}
+type ChatMessage = {
+  role: "engineer" | "user";
+  msg: string;
+  time: string;
+  data?: AIEngineerResponse;
+};
 
 const suggestions = [
   "Best strategy for Monaco wet race",
@@ -66,51 +55,226 @@ const suggestions = [
   "What if safety car at lap 15",
 ];
 
-const pipelineStages = [
-  { name: "Query Analysis", key: "query" },
-  { name: "Knowledge Retrieval", key: "retrieval" },
-  { name: "Simulation Run", key: "simulation" },
-  { name: "Risk Assessment", key: "risk" },
-  { name: "Confidence Scoring", key: "confidence" },
-];
+const PipelineTimeline = memo(function PipelineTimeline({
+  stages,
+}: {
+  stages: { name: string; status: string }[];
+}) {
+  return (
+    <div className="space-y-1">
+      {stages.map((stage, i) => (
+        <motion.div
+          key={stage.name}
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: i * 0.06 }}
+          className="flex items-center gap-2.5 p-1.5 rounded-sm bg-[#101010] border border-[#262626]/50"
+        >
+          <motion.span
+            animate={stage.status === "active" ? { scale: [1, 1.4, 1] } : {}}
+            transition={{
+              duration: 1.5,
+              repeat: stage.status === "active" ? Infinity : 0,
+            }}
+            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+              stage.status === "active"
+                ? "bg-[#00C8FF]"
+                : stage.status === "complete"
+                  ? "bg-[#00FF85]"
+                  : "bg-[#262626]"
+            }`}
+          />
+          <span
+            className={`text-[10px] font-mono ${
+              stage.status === "complete"
+                ? "text-white"
+                : stage.status === "active"
+                  ? "text-[#00C8FF]"
+                  : "text-[#666]"
+            }`}
+          >
+            {stage.name}
+          </span>
+          {stage.status === "active" && (
+            <motion.span
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 0.8, repeat: Infinity }}
+              className="text-[8px] text-[#00C8FF] font-mono ml-auto"
+            >
+              RUNNING
+            </motion.span>
+          )}
+          {stage.status === "complete" && (
+            <span className="text-[8px] text-[#00FF85] font-mono ml-auto">
+              DONE
+            </span>
+          )}
+        </motion.div>
+      ))}
+    </div>
+  );
+});
+
+const TelemetryContextPanel = memo(function TelemetryContextPanel({
+  data,
+}: {
+  data?: AIEngineerResponse;
+}) {
+  const tel = data?.telemetry_context;
+  if (!tel) return null;
+
+  return (
+    <div className="space-y-1.5">
+      {[
+        { label: "Speed", value: `${tel.speed} km/h`, color: "text-white" },
+        { label: "RPM", value: `${tel.rpm}`, color: "text-white" },
+        { label: "Gear", value: `${tel.gear}`, color: "text-[#00C8FF]" },
+        {
+          label: "Throttle",
+          value: `${tel.throttle}%`,
+          color: "text-[#00FF85]",
+        },
+        {
+          label: "Fuel",
+          value: `${tel.fuel_remaining} kg`,
+          color: "text-[#FFD400]",
+        },
+        { label: "Tyre", value: tel.tyre_compound, color: "text-[#FF8A00]" },
+        {
+          label: "Tyre Wear FL",
+          value: `${tel.tyre_wear_fl}%`,
+          color: "text-white",
+        },
+        {
+          label: "Tyre Temp FL",
+          value: `${tel.tyre_temp_fl}°C`,
+          color: "text-white",
+        },
+        {
+          label: "ERS",
+          value: `${tel.ers_deployment} MJ`,
+          color: "text-[#FFD400]",
+        },
+        { label: "ERS Mode", value: tel.ers_mode, color: "text-[#00C8FF]" },
+        { label: "Track", value: `${tel.track_temp}°C`, color: "text-white" },
+        { label: "Air", value: `${tel.air_temp}°C`, color: "text-white" },
+        { label: "Status", value: tel.session_status, color: "text-[#00FF85]" },
+      ].map((item) => (
+        <div key={item.label} className="flex justify-between items-center">
+          <span className="text-[9px] text-[#666] font-mono">{item.label}</span>
+          <span className={`text-[10px] font-mono font-bold ${item.color}`}>
+            {item.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+});
+
+function SelectControl({
+  label,
+  value,
+  onChange,
+  options,
+  disabled,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  disabled?: boolean;
+}) {
+  return (
+    <div className="space-y-1">
+      <span className="text-[8px] text-[#666] font-mono uppercase tracking-wider block">
+        {label}
+      </span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        className="w-full bg-[#0a0a0a] border border-[#262626] rounded-sm px-2 py-1 text-[10px] text-white font-mono focus:border-[#00C8FF]/50 focus:outline-none disabled:opacity-40 transition-colors"
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
 
 function AIEngineerPage() {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>(() => [
-    createInitialMessage(),
-  ]);
-  const v3Mutation = useV3Query();
-  const metricsQuery = useV3MetricsQuery();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [sessionId] = useState(() => Math.random().toString(36).slice(2, 14));
+  const [circuit, setCircuit] = useState("Monaco");
+  const [driver, setDriver] = useState("Max Verstappen");
+  const [team, setTeam] = useState("Red Bull");
+  const [weather, setWeather] = useState("Dry");
+  const totalLaps = 58;
 
-  useEffect(() => {
-    setMessages((prev) => {
-      if (prev[0]?.time === "") {
-        const now = new Date().toLocaleTimeString("en-GB", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        });
-        return [{ ...prev[0], time: now }, ...prev.slice(1)];
-      }
-      return prev;
-    });
-  }, []);
+  const chatMutation = useAIEngineerChat();
+  const metricsQuery = useV3MetricsQuery();
+  const circuitsQuery = useCircuitsQuery();
+  const telemetryQuery = useTelemetryLiveQuery();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSubmit = () => {
-    if (!input.trim() || v3Mutation.isPending) return;
+  useEffect(() => {
+    if (
+      circuitsQuery.data &&
+      circuit in
+        Object.keys(
+          circuitsQuery.data.reduce(
+            (acc: Record<string, boolean>, c: { name: string }) => {
+              acc[c.name] = true;
+              return acc;
+            },
+            {},
+          ),
+        )
+    ) {
+      // Circuit exists in data
+    }
+  }, [circuitsQuery.data, circuit]);
+
+  const circuitOptions = useMemo(() => {
+    if (!circuitsQuery.data) return [{ value: "Monaco", label: "Monaco" }];
+    const names = Object.keys(
+      circuitsQuery.data.reduce(
+        (acc: Record<string, boolean>, c: { name: string }) => {
+          acc[c.name] = true;
+          return acc;
+        },
+        {},
+      ),
+    );
+    return names.map((n) => ({ value: n, label: n }));
+  }, [circuitsQuery.data]);
+
+  const handleSubmit = useCallback(() => {
+    if (!input.trim() || chatMutation.isPending) return;
     const time = new Date().toLocaleTimeString("en-GB", {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
     });
     setMessages((prev) => [...prev, { role: "user", msg: input, time }]);
-    v3Mutation.mutate(
-      { query: input, circuit: "monaco", include_explainability: true },
+    chatMutation.mutate(
+      {
+        query: input,
+        session_id: sessionId,
+        circuit,
+        driver,
+        team,
+        weather,
+        total_laps: totalLaps,
+      },
       {
         onSuccess: (data) => {
           const t = new Date().toLocaleTimeString("en-GB", {
@@ -118,20 +282,9 @@ function AIEngineerPage() {
             minute: "2-digit",
             second: "2-digit",
           });
-          const msg =
-            (data.recommendation as Record<string, string>)?.strategy ||
-            (data.recommendation as Record<string, string>)?.recommendation ||
-            "Analysis complete. Check panel for details.";
           setMessages((prev) => [
             ...prev,
-            {
-              role: "engineer",
-              msg:
-                typeof msg === "string"
-                  ? msg
-                  : "Analysis complete. Check panel for details.",
-              time: t,
-            },
+            { role: "engineer", msg: data.recommendation, time: t, data },
           ]);
         },
         onError: (err) => {
@@ -152,12 +305,25 @@ function AIEngineerPage() {
       },
     );
     setInput("");
-  };
+  }, [
+    input,
+    chatMutation,
+    sessionId,
+    circuit,
+    driver,
+    team,
+    weather,
+    totalLaps,
+  ]);
+
+  const latestData = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].data) return messages[i].data;
+    }
+    return null;
+  }, [messages]);
 
   const metrics = metricsQuery.data;
-  const confBreakdown = v3Mutation.data?.confidence as
-    | Record<string, number>
-    | undefined;
 
   return (
     <div className="min-h-screen carbon-fiber">
@@ -188,23 +354,106 @@ function AIEngineerPage() {
                 </span>
               </div>
               <span className="text-[10px] text-[#666] font-mono">
-                v5.0 · {metrics?.agents_available ?? 0} agents
+                {metrics?.agents_available ?? 0} agents ·{" "}
+                {metrics?.pipeline_depth ?? 0} stages
               </span>
-              {metricsQuery.isLoading && (
-                <span className="text-[9px] text-[#666]">loading...</span>
-              )}
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {telemetryQuery.data && (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-sm bg-[#141414] border border-[#262626]">
+                <motion.span
+                  animate={{ opacity: [1, 0.3, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                  className="w-1 h-1 rounded-full bg-[#00FF85]"
+                />
+                <span className="text-[8px] text-[#666] font-mono">
+                  TELEMETRY LIVE
+                </span>
+              </div>
+            )}
           </div>
         </motion.div>
 
         <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-12 lg:col-span-7 space-y-3">
+          <div className="col-span-12 lg:col-span-5 space-y-3">
+            <motion.div variants={fadeUp}>
+              <FloatingPanel
+                variant="glass"
+                title="Race Context"
+                className="p-3"
+              >
+                <div className="grid grid-cols-2 gap-2">
+                  <SelectControl
+                    label="Circuit"
+                    value={circuit}
+                    onChange={setCircuit}
+                    options={circuitOptions}
+                    disabled={chatMutation.isPending}
+                  />
+                  <SelectControl
+                    label="Driver"
+                    value={driver}
+                    onChange={setDriver}
+                    options={[
+                      { value: "Max Verstappen", label: "Verstappen" },
+                      { value: "Lewis Hamilton", label: "Hamilton" },
+                      { value: "Lando Norris", label: "Norris" },
+                    ]}
+                    disabled={chatMutation.isPending}
+                  />
+                  <SelectControl
+                    label="Team"
+                    value={team}
+                    onChange={setTeam}
+                    options={[
+                      { value: "Red Bull", label: "Red Bull" },
+                      { value: "Ferrari", label: "Ferrari" },
+                      { value: "McLaren", label: "McLaren" },
+                      { value: "Mercedes", label: "Mercedes" },
+                    ]}
+                    disabled={chatMutation.isPending}
+                  />
+                  <SelectControl
+                    label="Weather"
+                    value={weather}
+                    onChange={setWeather}
+                    options={[
+                      { value: "Dry", label: "Dry" },
+                      { value: "Light Rain", label: "Light Rain" },
+                      { value: "Heavy Rain", label: "Heavy Rain" },
+                    ]}
+                    disabled={chatMutation.isPending}
+                  />
+                </div>
+              </FloatingPanel>
+            </motion.div>
+
             <motion.div variants={fadeUp}>
               <FloatingPanel
                 title="Session"
-                className="h-[calc(100vh-260px)] flex flex-col"
+                className="h-[calc(100vh-320px)] flex flex-col"
               >
                 <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                  {messages.length === 0 && (
+                    <div className="text-center py-12">
+                      <p className="text-[11px] text-[#666] font-mono">
+                        Ask the AI Engineer anything about race strategy
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 justify-center mt-4">
+                        {suggestions.map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => setInput(s)}
+                            disabled={chatMutation.isPending}
+                            className="text-[9px] text-[#666] border border-[#262626] rounded-sm px-2 py-1 hover:border-[#00C8FF]/30 hover:text-[#00C8FF] transition-colors disabled:opacity-50"
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <AnimatePresence>
                     {messages.map((m, i) => (
                       <motion.div
@@ -217,7 +466,7 @@ function AIEngineerPage() {
                         }`}
                       >
                         <div
-                          className={`max-w-[85%] p-2.5 rounded-sm text-xs leading-relaxed ${
+                          className={`max-w-[90%] p-2.5 rounded-sm text-[11px] leading-relaxed ${
                             m.role === "user"
                               ? "bg-[#E10600]/10 border border-[#E10600]/20 text-white"
                               : "bg-[#101010] border border-[#262626] text-[#A0A0A0]"
@@ -229,11 +478,32 @@ function AIEngineerPage() {
                             </span>
                           )}
                           {m.msg}
+                          {m.data && (
+                            <div className="mt-2 pt-2 border-t border-[#262626]/50 flex gap-2">
+                              <span className="text-[8px] text-[#00FF85] font-mono">
+                                CONF {Math.round(m.data.confidence * 100)}%
+                              </span>
+                              <span
+                                className={`text-[8px] font-mono ${
+                                  m.data.risk_level === "low"
+                                    ? "text-[#00FF85]"
+                                    : m.data.risk_level === "high"
+                                      ? "text-[#E10600]"
+                                      : "text-[#FFD400]"
+                                }`}
+                              >
+                                RISK {m.data.risk_level.toUpperCase()}
+                              </span>
+                              <span className="text-[8px] text-[#666] font-mono">
+                                {m.data.simulation_summary.iterations} sims
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     ))}
                   </AnimatePresence>
-                  {v3Mutation.isPending && (
+                  {chatMutation.isPending && (
                     <motion.div
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -243,7 +513,7 @@ function AIEngineerPage() {
                         <motion.span
                           animate={{ opacity: [1, 0.3, 1] }}
                           transition={{ duration: 1, repeat: Infinity }}
-                          className="text-xs text-[#666]"
+                          className="text-[10px] text-[#666]"
                         >
                           Processing via AI pipeline
                         </motion.span>
@@ -277,8 +547,8 @@ function AIEngineerPage() {
                     }
                     placeholder="Ask the AI Engineer..."
                     rows={2}
-                    disabled={v3Mutation.isPending}
-                    className="w-full bg-[#101010] border border-[#262626] rounded-sm px-3 py-2 text-xs text-white placeholder:text-[#666] focus:outline-none focus:border-[#00C8FF]/50 resize-none disabled:opacity-50 font-mono"
+                    disabled={chatMutation.isPending}
+                    className="w-full bg-[#101010] border border-[#262626] rounded-sm px-3 py-2 text-[11px] text-white placeholder:text-[#666] focus:outline-none focus:border-[#00C8FF]/50 resize-none disabled:opacity-50 font-mono"
                   />
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex flex-wrap gap-1.5">
@@ -286,8 +556,8 @@ function AIEngineerPage() {
                         <button
                           key={s}
                           onClick={() => setInput(s)}
-                          disabled={v3Mutation.isPending}
-                          className="text-[10px] text-[#666] border border-[#262626] rounded-sm px-2 py-1 hover:border-[#666] hover:text-[#A0A0A0] transition-colors disabled:opacity-50"
+                          disabled={chatMutation.isPending}
+                          className="text-[9px] text-[#666] border border-[#262626] rounded-sm px-2 py-1 hover:border-[#666] hover:text-[#A0A0A0] transition-colors disabled:opacity-50"
                         >
                           {s}
                         </button>
@@ -295,8 +565,8 @@ function AIEngineerPage() {
                     </div>
                     <button
                       onClick={handleSubmit}
-                      disabled={v3Mutation.isPending || !input.trim()}
-                      className="bg-[#00C8FF] text-black px-4 py-1.5 rounded-sm text-xs font-bold hover:bg-[#00C8FF]/80 transition-colors disabled:opacity-50 uppercase tracking-[0.08em] shrink-0"
+                      disabled={chatMutation.isPending || !input.trim()}
+                      className="bg-[#00C8FF] text-black px-4 py-1.5 rounded-sm text-[10px] font-bold hover:bg-[#00C8FF]/80 transition-colors disabled:opacity-50 uppercase tracking-[0.08em] shrink-0"
                     >
                       Submit
                     </button>
@@ -306,230 +576,327 @@ function AIEngineerPage() {
             </motion.div>
           </div>
 
-          <div className="col-span-12 lg:col-span-5 space-y-3">
+          <div className="col-span-12 lg:col-span-7 space-y-3">
             <motion.div variants={fadeUp}>
-              <FloatingPanel title="Intelligence Pipeline">
-                <div className="space-y-1">
-                  {pipelineStages.map((stage, i) => {
-                    const stageStatus =
-                      stage.key === "risk" || stage.key === "confidence"
-                        ? v3Mutation.data
-                          ? "complete"
-                          : "idle"
-                        : v3Mutation.isPending
-                          ? "active"
-                          : v3Mutation.data
-                            ? "complete"
-                            : "idle";
-                    return (
-                      <motion.div
-                        key={stage.key}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.06 }}
-                        whileHover={{ y: -2 }}
-                        className="flex items-center gap-3 p-2 rounded-sm bg-[#101010] border border-[#262626]/50 hover:border-[#333] transition-all"
+              <FloatingPanel variant="glass" title="Intelligence Pipeline">
+                {latestData?.pipeline_stages ? (
+                  <PipelineTimeline stages={latestData.pipeline_stages} />
+                ) : (
+                  <div className="space-y-1">
+                    {[
+                      "Knowledge Retrieval",
+                      "Simulation Engine",
+                      "Historical Analysis",
+                      "Telemetry Processing",
+                      "Risk Assessment",
+                      "Data Synchronization",
+                      "Intelligence Fusion",
+                    ].map((name) => (
+                      <div
+                        key={name}
+                        className="flex items-center gap-2.5 p-1.5 rounded-sm bg-[#101010] border border-[#262626]/50"
                       >
-                        <motion.span
-                          animate={
-                            stageStatus === "active"
-                              ? { scale: [1, 1.4, 1] }
-                              : {}
-                          }
-                          transition={{
-                            duration: 1.5,
-                            repeat: stageStatus === "active" ? Infinity : 0,
-                          }}
-                          className={`w-2 h-2 rounded-full shrink-0 ${
-                            stageStatus === "active"
-                              ? "bg-[#00C8FF]"
-                              : stageStatus === "complete"
-                                ? "bg-[#00FF85]"
-                                : "bg-[#666]"
-                          }`}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <span className="text-xs text-white font-medium">
-                            {stage.name}
-                          </span>
-                        </div>
-                        {stageStatus === "active" && (
-                          <motion.span
-                            animate={{ opacity: [1, 0.3, 1] }}
-                            transition={{ duration: 0.8, repeat: Infinity }}
-                            className="text-[9px] text-[#00C8FF] font-mono"
-                          >
-                            RUNNING
-                          </motion.span>
-                        )}
-                        {stageStatus === "complete" && (
-                          <span className="text-[9px] text-[#00FF85] font-mono">
-                            DONE
-                          </span>
-                        )}
-                        {stageStatus === "idle" && (
-                          <span className="text-[9px] text-[#666] font-mono">
-                            STANDBY
-                          </span>
-                        )}
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </FloatingPanel>
-            </motion.div>
-
-            <motion.div variants={fadeUp}>
-              <FloatingPanel title="Confidence & Sources">
-                <ConfidenceMeter
-                  value={confBreakdown?.overall ?? 0}
-                  label="Overall Confidence"
-                  size="md"
-                />
-                <div className="mt-3 space-y-2">
-                  <ConfidenceMeter
-                    value={
-                      confBreakdown?.rag ??
-                      confBreakdown?.knowledge_retrieval ??
-                      0
-                    }
-                    label="RAG Retrieval"
-                    size="sm"
-                  />
-                  <ConfidenceMeter
-                    value={confBreakdown?.simulation ?? 0}
-                    label="Simulation"
-                    size="sm"
-                  />
-                  <ConfidenceMeter
-                    value={confBreakdown?.historical ?? 0}
-                    label="Historical"
-                    size="sm"
-                  />
-                  <ConfidenceMeter
-                    value={confBreakdown?.memory ?? 0}
-                    label="Memory"
-                    size="sm"
-                  />
-                </div>
-                {v3Mutation.data?.trust_score && (
-                  <div className="mt-4 pt-3 border-t border-[#262626]/50">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-[#A0A0A0]">
-                        Trust Score
-                      </span>
-                      <span className="text-xs text-[#00C8FF] font-mono tabular-nums">
-                        {(v3Mutation.data.trust_score as Record<string, number>)
-                          ?.score ?? 0}
-                      </span>
-                    </div>
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#262626]" />
+                        <span className="text-[10px] text-[#666] font-mono">
+                          {name}
+                        </span>
+                        <span className="text-[8px] text-[#666] font-mono ml-auto">
+                          STANDBY
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 )}
-                <div className="mt-4 pt-3 border-t border-[#262626]/50">
-                  <span className="text-[9px] uppercase tracking-[0.12em] text-[#666] font-medium">
-                    Response Latency
-                  </span>
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-[10px] text-[#A0A0A0]">
-                      Total pipeline
-                    </span>
-                    <span className="text-xs text-white font-mono tabular-nums">
-                      {v3Mutation.data
-                        ? `${metrics?.pipeline_depth ?? 0} stages`
-                        : "—"}
-                    </span>
-                  </div>
-                </div>
               </FloatingPanel>
             </motion.div>
 
-            <motion.div variants={fadeUp}>
-              <FloatingPanel title="Source Context">
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { label: "Simulation", active: true },
-                    {
-                      label: "RAG",
-                      active: (metrics?.rag_documents_indexed ?? 0) > 0,
-                    },
-                    {
-                      label: "Historical",
-                      active: (metrics?.rag_documents_indexed ?? 0) > 0,
-                    },
-                    {
-                      label: "Memory",
-                      active: (metrics?.memory_entries ?? 0) > 0,
-                    },
-                    { label: "Telemetry", active: false },
-                  ].map((src) => (
-                    <span
-                      key={src.label}
-                      className={`text-[10px] px-2 py-1 rounded-sm font-mono ${
-                        src.active
-                          ? "bg-[#00C8FF]/10 text-[#00C8FF] border border-[#00C8FF]/30"
-                          : "bg-[#101010] text-[#666] border border-[#262626]"
-                      }`}
-                    >
-                      {src.label}
-                      {src.active && (
-                        <motion.span
-                          animate={{ opacity: [1, 0.3, 1] }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
-                          className="ml-1 inline-block w-1 h-1 rounded-full bg-[#00C8FF]"
+            <div className="grid grid-cols-2 gap-3">
+              <motion.div variants={fadeUp}>
+                <FloatingPanel variant="compact" title="Confidence & Trust">
+                  {latestData ? (
+                    <div className="space-y-2">
+                      <ConfidenceMeter
+                        value={latestData.confidence}
+                        label="Overall"
+                        size="md"
+                      />
+                      <div className="space-y-1.5">
+                        <ConfidenceMeter
+                          value={latestData.confidence_breakdown.rag}
+                          label="RAG"
+                          size="sm"
                         />
-                      )}
-                    </span>
-                  ))}
-                </div>
-              </FloatingPanel>
-            </motion.div>
+                        <ConfidenceMeter
+                          value={latestData.confidence_breakdown.simulation}
+                          label="Simulation"
+                          size="sm"
+                        />
+                        <ConfidenceMeter
+                          value={latestData.confidence_breakdown.historical}
+                          label="Historical"
+                          size="sm"
+                        />
+                        <ConfidenceMeter
+                          value={latestData.confidence_breakdown.memory}
+                          label="Memory"
+                          size="sm"
+                        />
+                        <ConfidenceMeter
+                          value={latestData.confidence_breakdown.telemetry}
+                          label="Telemetry"
+                          size="sm"
+                        />
+                      </div>
+                      <div className="pt-2 border-t border-[#262626]/50">
+                        <div className="flex justify-between">
+                          <span className="text-[9px] text-[#666] font-mono">
+                            TRUST
+                          </span>
+                          <span
+                            className={`text-[10px] font-mono font-bold ${
+                              latestData.risk_level === "low"
+                                ? "text-[#00FF85]"
+                                : latestData.risk_level === "high"
+                                  ? "text-[#E10600]"
+                                  : "text-[#FFD400]"
+                            }`}
+                          >
+                            {latestData.risk_level.toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <CardSkeleton lines={3} />
+                  )}
+                </FloatingPanel>
+              </motion.div>
 
-            <motion.div variants={fadeUp}>
-              <FloatingPanel variant="compact" title="Evidence Sources">
-                <div className="space-y-2 text-xs">
-                  {[
-                    {
-                      label: "Simulation Runs",
-                      value: "—",
-                      color: "text-white",
-                    },
-                    {
-                      label: "Historical Races",
-                      value: String(metrics?.rag_documents_indexed ?? 0),
-                      color: "text-white",
-                    },
-                    {
-                      label: "Memory Entries",
-                      value: String(metrics?.memory_entries ?? 0),
-                      color: "text-white",
-                    },
-                    {
-                      label: "Confidence Threshold",
-                      value: "—",
-                      color: "text-[#00FF85]",
-                    },
-                  ].map((item, i) => (
-                    <motion.div
-                      key={item.label}
-                      initial={{ opacity: 0, x: -5 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.08 }}
-                      className={`flex justify-between py-1 ${
-                        i < 3 ? "border-b border-[#262626]/50" : ""
-                      }`}
-                    >
-                      <span className="text-[#A0A0A0]">{item.label}</span>
-                      <span className={`${item.color} font-mono tabular-nums`}>
-                        {item.value}
+              <motion.div variants={fadeUp}>
+                <FloatingPanel variant="compact" title="Telemetry Context">
+                  {latestData ? (
+                    <TelemetryContextPanel data={latestData} />
+                  ) : telemetryQuery.data ? (
+                    <div className="space-y-1.5">
+                      {[
+                        {
+                          label: "Speed",
+                          value: `${telemetryQuery.data.speed} km/h`,
+                        },
+                        { label: "Gear", value: `${telemetryQuery.data.gear}` },
+                        {
+                          label: "Throttle",
+                          value: `${telemetryQuery.data.throttle}%`,
+                        },
+                        {
+                          label: "Fuel",
+                          value: `${telemetryQuery.data.fuel_remaining} kg`,
+                        },
+                        {
+                          label: "ERS",
+                          value: `${telemetryQuery.data.ers_deployment} MJ`,
+                        },
+                        {
+                          label: "Session",
+                          value: telemetryQuery.data.session.status,
+                        },
+                      ].map((item) => (
+                        <div key={item.label} className="flex justify-between">
+                          <span className="text-[9px] text-[#666] font-mono">
+                            {item.label}
+                          </span>
+                          <span className="text-[10px] text-white font-mono font-bold">
+                            {item.value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <CardSkeleton lines={3} />
+                  )}
+                </FloatingPanel>
+              </motion.div>
+            </div>
+
+            {latestData && latestData.alternatives.length > 0 && (
+              <motion.div variants={fadeUp}>
+                <FloatingPanel variant="compact" title="Strategy Comparison">
+                  <div className="grid grid-cols-3 gap-2">
+                    {latestData.alternatives.map((alt, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className={`p-2 rounded-sm border ${
+                          i === 0
+                            ? "bg-[#00C8FF]/5 border-[#00C8FF]/20"
+                            : "bg-[#141414]/60 border-[#262626]"
+                        }`}
+                      >
+                        <span className="text-[9px] text-[#666] font-mono block">
+                          {alt.strategy}
+                        </span>
+                        <span className="text-[10px] text-white font-mono font-bold block mt-0.5">
+                          {alt.compound} · Lap {alt.pit_lap}
+                        </span>
+                        <span className="text-[9px] text-[#666] font-mono block">
+                          {alt.estimated_time > 0
+                            ? `${alt.estimated_time.toFixed(1)}s`
+                            : "N/A"}
+                        </span>
+                        <span
+                          className={`text-[8px] font-mono ${
+                            alt.risk === "low"
+                              ? "text-[#00FF85]"
+                              : alt.risk === "high"
+                                ? "text-[#E10600]"
+                                : "text-[#FFD400]"
+                          }`}
+                        >
+                          {alt.risk.toUpperCase()} RISK
+                        </span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </FloatingPanel>
+              </motion.div>
+            )}
+
+            {latestData && latestData.reasoning_chain.length > 0 && (
+              <motion.div variants={fadeUp}>
+                <FloatingPanel variant="compact" title="Reasoning Chain">
+                  <div className="space-y-1">
+                    {latestData.reasoning_chain.map((step, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        className="flex gap-2 items-start"
+                      >
+                        <span className="text-[8px] text-[#00C8FF] font-mono shrink-0 mt-0.5">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <div>
+                          <span className="text-[9px] text-white font-mono font-bold block">
+                            {step.step}
+                          </span>
+                          <span className="text-[9px] text-[#666] font-mono block">
+                            {step.detail}
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </FloatingPanel>
+              </motion.div>
+            )}
+
+            {latestData && latestData.knowledge_references.length > 0 && (
+              <motion.div variants={fadeUp}>
+                <FloatingPanel variant="compact" title="Knowledge References">
+                  <div className="space-y-1.5">
+                    {latestData.knowledge_references.map((ref, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        className="p-2 rounded-sm bg-[#141414]/60 border border-[#262626]"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] text-[#00C8FF] font-mono font-bold">
+                            {ref.source}
+                          </span>
+                          <span className="text-[8px] text-[#666] font-mono">
+                            {Math.round(ref.relevance * 100)}% match
+                          </span>
+                        </div>
+                        <p className="text-[9px] text-[#666] font-mono mt-1 line-clamp-2">
+                          {ref.excerpt}
+                        </p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </FloatingPanel>
+              </motion.div>
+            )}
+
+            {latestData && (
+              <motion.div variants={fadeUp}>
+                <FloatingPanel
+                  variant="compact"
+                  title="Historical & Simulation"
+                >
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <span className="text-[9px] text-[#666] font-mono uppercase tracking-wider">
+                        Historical
                       </span>
-                    </motion.div>
-                  ))}
-                </div>
-              </FloatingPanel>
-            </motion.div>
+                      <div className="flex justify-between">
+                        <span className="text-[9px] text-[#666] font-mono">
+                          Races
+                        </span>
+                        <span className="text-[10px] text-white font-mono font-bold">
+                          {latestData.historical_comparison.total_races}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-[9px] text-[#666] font-mono">
+                          Last Winner
+                        </span>
+                        <span className="text-[10px] text-white font-mono font-bold">
+                          {latestData.historical_comparison.recent_winner}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-[9px] text-[#666] font-mono">
+                          Last Strategy
+                        </span>
+                        <span className="text-[10px] text-white font-mono font-bold">
+                          {latestData.historical_comparison.recent_strategy}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <span className="text-[9px] text-[#666] font-mono uppercase tracking-wider">
+                        Simulation
+                      </span>
+                      <div className="flex justify-between">
+                        <span className="text-[9px] text-[#666] font-mono">
+                          Iterations
+                        </span>
+                        <span className="text-[10px] text-white font-mono font-bold">
+                          {latestData.simulation_summary.iterations}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-[9px] text-[#666] font-mono">
+                          Best Strategy
+                        </span>
+                        <span className="text-[10px] text-[#00FF85] font-mono font-bold">
+                          {latestData.simulation_summary.best_strategy}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-[9px] text-[#666] font-mono">
+                          Risk Assessed
+                        </span>
+                        <span className="text-[10px] text-white font-mono font-bold">
+                          {latestData.simulation_summary.risk_assessments}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </FloatingPanel>
+              </motion.div>
+            )}
           </div>
         </div>
       </motion.div>
     </div>
   );
 }
+
+import { memo } from "react";

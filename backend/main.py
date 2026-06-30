@@ -28,6 +28,7 @@ from backend.services.data_service import (
 from backend.app.api.v2.endpoints.dashboard import router as dashboard_v2_router
 from backend.app.api.v2.endpoints.simulations import router as simulations_v2_router
 from backend.api.intelligence import router as intelligence_v3_router
+from backend.api.ai_engineer import router as ai_engineer_router
 APP_VERSION = "4.5.0"
 APP_BUILD = "2025-Q2"
 
@@ -42,6 +43,7 @@ def startup_warmup():
 app.include_router(dashboard_v2_router, prefix="/api/v2/dashboard", tags=["Dashboard V2"])
 app.include_router(simulations_v2_router, prefix="/api/v2/simulations", tags=["Simulations V2"])
 app.include_router(intelligence_v3_router)
+app.include_router(ai_engineer_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8080,http://localhost:8081,http://127.0.0.1:8080,http://127.0.0.1:8081").split(","),
@@ -335,9 +337,19 @@ def historical_comparison(circuit: str, strategy: str):
 def pit_accuracy(circuit: str, lap: int):
     return analyze_pit_accuracy(circuit, lap)
 
+@app.get("/drivers")
+def list_drivers():
+    from backend.services.data_service import load_drivers
+    return load_drivers()
+
 @app.get("/driver/{name}")
 def driver_profile(name: str):
     return get_driver(name)
+
+@app.get("/teams")
+def list_teams():
+    from backend.services.data_service import load_teams
+    return load_teams()
 
 @app.get("/team/{team}")
 def team_dna(team: str):
@@ -381,3 +393,18 @@ def ai_strategy_core(payload: dict):
         payload.get("safety_car"),
         payload.get("weather"),
     )
+
+
+# ─── Telemetry Endpoints ──────────────────────────────────────────────────
+
+from backend.services.telemetry_simulator import generate_telemetry_snapshot, get_telemetry_history
+
+
+@app.get("/api/telemetry/live")
+def telemetry_live():
+    return generate_telemetry_snapshot()
+
+
+@app.get("/api/telemetry/history")
+def telemetry_history(count: int = 60):
+    return get_telemetry_history(count)

@@ -630,6 +630,36 @@ export async function getKnowledgeArticles(): Promise<KnowledgeArticle[]> {
   return fetchApi("/knowledge/articles");
 }
 
+export interface DriverData {
+  name: string;
+  team: string;
+  aggression: number;
+  tyre_management: number;
+  wet_weather: number;
+  overtaking: number;
+}
+
+export async function getDrivers(): Promise<DriverData[]> {
+  return fetchApi("/drivers");
+}
+
+export interface TeamData {
+  name: string;
+  aggression: number;
+  undercut_bias: number;
+  risk_tolerance: number;
+  tyre_focus: number;
+  weather_adaptability: number;
+}
+
+export async function getTeams(): Promise<TeamData[]> {
+  return fetchApi("/teams");
+}
+
+export async function getWeatherOptions(): Promise<string[]> {
+  return fetchApi("/weather-options");
+}
+
 export interface StatusResponse {
   api: string;
   version: string;
@@ -655,4 +685,233 @@ export async function getPipelineHealth(): Promise<PipelineHealthResponse> {
 
 export async function getStatus(): Promise<StatusResponse> {
   return fetchApi("/status");
+}
+
+// ─── Telemetry Endpoints ─────────────────────────────────────────────────
+
+export interface TelemetryTyre {
+  compound: string;
+  wear: {
+    front_left: number;
+    front_right: number;
+    rear_left: number;
+    rear_right: number;
+  };
+  temperature: {
+    front_left: number;
+    front_right: number;
+    rear_left: number;
+    rear_right: number;
+  };
+  pressure: {
+    front_left: number;
+    front_right: number;
+    rear_left: number;
+    rear_right: number;
+  };
+}
+
+export interface TelemetryTrack {
+  temp: number;
+  grip_level: number;
+  rubber_level: number;
+  clean_air: number;
+  current_segment: string;
+}
+
+export interface TelemetryWeather {
+  condition: string;
+  air_temp: number;
+  humidity: number;
+  wind_speed: number;
+  wind_direction: number;
+  visibility_km: number;
+  rain_probability: number;
+}
+
+export interface TelemetryERS {
+  deployment: number;
+  harvesting: number;
+  battery_pct: number;
+  mode: string;
+}
+
+export interface TelemetrySession {
+  status: string;
+  elapsed_seconds: number;
+  lap: number;
+  total_laps: number;
+  position: number;
+}
+
+export interface TelemetryRadioEvent {
+  time: string;
+  speaker: string;
+  message: string;
+}
+
+export interface TelemetrySnapshot {
+  timestamp: number;
+  lap: number;
+  sector: number;
+  lap_time: number;
+  last_lap_time: number;
+  speed: number;
+  rpm: number;
+  gear: number;
+  throttle: number;
+  brake: number;
+  steering: number;
+  ers_deployment: number;
+  drs_active: boolean;
+  fuel_remaining: number;
+  fuel_per_lap: number;
+  battery_pct: number;
+  delta_to_leader: number;
+  gap_ahead: number;
+  gap_behind: number;
+  tyre: TelemetryTyre;
+  track: TelemetryTrack;
+  weather: TelemetryWeather;
+  ers: TelemetryERS;
+  session: TelemetrySession;
+  radio: TelemetryRadioEvent[];
+}
+
+export async function getTelemetryLive(): Promise<TelemetrySnapshot> {
+  return fetchApi("/api/telemetry/live");
+}
+
+export async function getTelemetryHistory(
+  count = 60,
+): Promise<TelemetrySnapshot[]> {
+  return fetchApi(`/api/telemetry/history?count=${count}`);
+}
+
+// ─── AI Engineer Endpoints ───────────────────────────────────────────────
+
+export interface AIEngineerRequest {
+  query: string;
+  session_id?: string;
+  circuit?: string;
+  driver?: string;
+  team?: string;
+  weather?: string;
+  total_laps?: number;
+  current_lap?: number;
+}
+
+export interface AIEngineerAlternative {
+  strategy: string;
+  compound: string;
+  pit_lap: number;
+  estimated_time: number;
+  risk: string;
+}
+
+export interface AIEngineerReasoningStep {
+  step: string;
+  detail: string;
+}
+
+export interface AIEngineerResponse {
+  session_id: string;
+  recommendation: string;
+  reasoning: string;
+  confidence: number;
+  confidence_breakdown: {
+    rag: number;
+    simulation: number;
+    historical: number;
+    memory: number;
+    telemetry: number;
+  };
+  risk_level: string;
+  risk_score: number;
+  alternatives: AIEngineerAlternative[];
+  simulation_summary: {
+    iterations: number;
+    best_strategy: string;
+    risk_assessments: number;
+    telemetry_simulated: boolean;
+  };
+  historical_comparison: {
+    total_races: number;
+    circuit: string;
+    recent_winner: string;
+    recent_strategy: string;
+  };
+  knowledge_references: {
+    source: string;
+    relevance: number;
+    excerpt: string;
+  }[];
+  telemetry_context: {
+    speed: number;
+    rpm: number;
+    gear: number;
+    throttle: number;
+    fuel_remaining: number;
+    tyre_compound: string;
+    tyre_wear_fl: number;
+    tyre_temp_fl: number;
+    ers_deployment: number;
+    ers_mode: string;
+    track_temp: number;
+    air_temp: number;
+    session_status: string;
+  };
+  reasoning_chain: AIEngineerReasoningStep[];
+  evidence: Record<string, unknown>[];
+  pipeline_stages: {
+    name: string;
+    status: string;
+  }[];
+  strategy_comparison?: Record<string, unknown> | null;
+}
+
+export interface AIEngineerSessionMessage {
+  role: string;
+  content: string;
+  timestamp: number;
+  meta: Record<string, unknown>;
+}
+
+export interface AIEngineerSessionResponse {
+  session_id: string;
+  messages: AIEngineerSessionMessage[];
+}
+
+export async function aiEngineerChat(
+  payload: AIEngineerRequest,
+): Promise<AIEngineerResponse> {
+  return fetchApi("/api/ai-engineer/chat", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function aiEngineerGetSession(
+  sessionId: string,
+): Promise<AIEngineerSessionResponse> {
+  return fetchApi(`/api/ai-engineer/session/${sessionId}`);
+}
+
+export async function aiEngineerClearSession(
+  sessionId: string,
+): Promise<{ status: string }> {
+  return fetchApi(`/api/ai-engineer/session/${sessionId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function aiEngineerContext(circuit: string): Promise<{
+  circuit: string;
+  data: Record<string, unknown>;
+  historical_races: number;
+  recent_races: unknown[];
+}> {
+  return fetchApi(
+    `/api/ai-engineer/context/${encodeURIComponent(circuit)}`,
+  );
 }
