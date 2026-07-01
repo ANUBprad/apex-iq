@@ -1,7 +1,8 @@
+import enum
 from datetime import datetime
 from uuid import UUID, uuid4
 from typing import List, Optional, Dict, Any
-from sqlalchemy import ForeignKey, String, Integer, Float, DateTime, JSON
+from sqlalchemy import ForeignKey, String, Integer, Float, DateTime, JSON, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.app.models.base import Base
@@ -44,7 +45,7 @@ class Circuit(Base):
     laps: Mapped[int] = mapped_column(Integer, init=True)
     length_km: Mapped[float] = mapped_column(Float, init=True)
     avg_pit_loss: Mapped[float] = mapped_column(Float, init=True)
-    characteristics: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True, init=True)
+    characteristics: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True, default=None, init=True)
 
     sessions: Mapped[List["RaceSession"]] = relationship(back_populates="circuit", init=False)
 
@@ -52,12 +53,12 @@ class RaceSession(Base):
     __tablename__ = "race_sessions"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default_factory=uuid4, init=False)
-    circuit_id: Mapped[str] = mapped_column(ForeignKey("circuits.id"), init=True)
-    driver_id: Mapped[str] = mapped_column(ForeignKey("drivers.id"), init=True)
+    circuit_id: Mapped[Optional[str]] = mapped_column(ForeignKey("circuits.id"), nullable=True, default=None, init=True)
+    driver_id: Mapped[Optional[str]] = mapped_column(ForeignKey("drivers.id"), nullable=True, default=None, init=True)
+    status: Mapped[str] = mapped_column(String, default="LIVE", init=True) # LIVE, COMPLETED
     
     start_time: Mapped[datetime] = mapped_column(DateTime, default_factory=datetime.utcnow, init=False)
-    config: Mapped[Dict[str, Any]] = mapped_column(JSON, init=True) # compound, tyre_age, gaps, etc.
-    status: Mapped[str] = mapped_column(String, default="LIVE", init=True) # LIVE, COMPLETED
+    config: Mapped[Dict[str, Any]] = mapped_column(JSON, default_factory=dict, init=True) # compound, tyre_age, gaps, etc.
 
     circuit: Mapped["Circuit"] = relationship(back_populates="sessions", init=False)
     driver: Mapped["Driver"] = relationship(back_populates="sessions", init=False)
@@ -82,18 +83,36 @@ class SimulationResult(Base):
 
     session: Mapped["RaceSession"] = relationship(back_populates="simulations", init=False)
 
+class JobStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+class SimulationJob(Base):
+    __tablename__ = "simulation_jobs"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default_factory=uuid4, init=False)
+    params: Mapped[Dict[str, Any]] = mapped_column(JSON, init=True)
+    result_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("simulation_results.id"), nullable=True, default=None, init=True)
+    error_message: Mapped[Optional[str]] = mapped_column(String, nullable=True, default=None, init=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True, default=None, init=True)
+    status: Mapped[JobStatus] = mapped_column(SAEnum(JobStatus), default=JobStatus.PENDING, init=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default_factory=datetime.utcnow, init=False)
+
+    result: Mapped[Optional["SimulationResult"]] = relationship(init=False)
+
 class StrategyMemory(Base):
     __tablename__ = "strategy_memory"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default_factory=uuid4, init=False)
-    session_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("race_sessions.id"), nullable=True, init=True)
     circuit_id: Mapped[str] = mapped_column(ForeignKey("circuits.id"), init=True)
     driver_id: Mapped[str] = mapped_column(ForeignKey("drivers.id"), init=True)
-    
     strategy: Mapped[str] = mapped_column(String, init=True)
     success_score: Mapped[float] = mapped_column(Float, init=True) # 0.0 - 1.0
     confidence_score: Mapped[float] = mapped_column(Float, init=True)
     outcome_metadata: Mapped[Dict[str, Any]] = mapped_column(JSON, init=True)
+    session_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("race_sessions.id"), nullable=True, init=True, default=None)
     
     created_at: Mapped[datetime] = mapped_column(DateTime, default_factory=datetime.utcnow, init=False)
 

@@ -13,6 +13,9 @@ from backend.app.domains.strategy.service import StrategyService
 from backend.app.domains.simulation.service import SimulationService
 from backend.app.domains.history.service import HistoricalAnalysisService
 from backend.app.domains.dashboard.service import DashboardAggregatorService
+from backend.app.domains.intelligence.service import StrategyIntelligenceService
+from backend.app.ml.prediction_service import PredictionService
+from backend.app.ml.explainability import PredictionExplanationService
 
 # Repository Dependencies
 def get_driver_repo(db: AsyncSession = Depends(get_db)):
@@ -50,17 +53,42 @@ def get_simulation_service(simulation_repo = Depends(get_simulation_repo)):
 def get_history_service(historical_repo = Depends(get_historical_repo)):
     return HistoricalAnalysisService(historical_repo)
 
-def get_aggregator_service(
+# ML Services (Singletons to avoid model reloading)
+_prediction_service = PredictionService()
+_explanation_service = PredictionExplanationService(_prediction_service)
+
+def get_prediction_service():
+    return _prediction_service
+
+def get_explanation_service():
+    return _explanation_service
+
+def get_intelligence_service(
     strategy_service = Depends(get_strategy_service),
     simulation_service = Depends(get_simulation_service),
     history_service = Depends(get_history_service),
     driver_repo = Depends(get_driver_repo),
-    team_repo = Depends(get_team_repo)
+    team_repo = Depends(get_team_repo),
+    prediction_service = Depends(get_prediction_service),
+    explanation_service = Depends(get_explanation_service)
 ):
-    return DashboardAggregatorService(
+    return StrategyIntelligenceService(
         strategy_service,
         simulation_service,
         history_service,
+        driver_repo,
+        team_repo,
+        prediction_service,
+        explanation_service
+    )
+
+def get_aggregator_service(
+    intelligence_service = Depends(get_intelligence_service),
+    driver_repo = Depends(get_driver_repo),
+    team_repo = Depends(get_team_repo)
+):
+    return DashboardAggregatorService(
+        intelligence_service,
         driver_repo,
         team_repo
     )

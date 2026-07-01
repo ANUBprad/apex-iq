@@ -1,12 +1,6 @@
-import sys
-import os
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(BASE_DIR)
-
-from ml.strategy_engine import StrategyEngine
-from agents.race_engineer import RaceEngineer
-from simulation.strategy_simulator import StrategySimulator
+from backend.ml.strategy_engine import StrategyEngine
+from backend.agents.race_engineer import RaceEngineer
+from backend.simulation.strategy_simulator import StrategySimulator
 
 engine = StrategyEngine()
 race_engineer = RaceEngineer()

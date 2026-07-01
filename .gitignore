@@ -1,7 +1,10 @@
 venv/
 data/cache/
+data/chroma_db/
+data/chroma_memory/
 *.pkl
 *.log
+
 
 # Chroma vector databases
 data/chroma_db/
@@ -13,3 +16,60 @@ __pycache__/
 
 # Environment
 .env
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+.wrangler/
+.tanstack/
+*.pyc
+.DS_Store
+node_modules/
+.uploads/
+frontend/temp/
+*.egg-info/
+.vscode/
+.idea/
+
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+
+# Node
+node_modules/
+
+# Environment
+.env
+.env.*
+
+# Runtime databases
+data/chroma_db/
+data/chroma_memory/
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Build
+dist/
+build/
+
+# Python caches
+.pytest_cache/
+.mypy_cache/
+
+# Chroma
+data/

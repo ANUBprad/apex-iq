@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -19,12 +20,37 @@ from backend.services.team_service import get_team
 from backend.services.replay_intelligence import analyze_replay_lap
 from backend.services.strategy_learning import (store_scenario, analyze_similar_cases)
 from backend.services.ai_strategy_core import compute_ai_strategy
+from backend.services.data_service import (
+    load_circuits, load_compounds,
+    get_degradation_curve, get_knowledge_articles, get_weather_options,
+)
 
 from backend.app.api.v2.endpoints.dashboard import router as dashboard_v2_router
+from backend.app.api.v2.endpoints.simulations import router as simulations_v2_router
+from backend.api.intelligence import router as intelligence_v3_router
+from backend.api.ai_engineer import router as ai_engineer_router
+APP_VERSION = "4.5.0"
+APP_BUILD = "2025-Q2"
 
-app = FastAPI(title="F1 AI Race Engineer API", version="1.0")
+app = FastAPI(title="F1 AI Race Engineer API", version=APP_VERSION)
+
+
+@app.on_event("startup")
+def startup_warmup():
+    import threading as _t
+    from backend.intelligence.rag.embedding_service import warmup as _w
+    _t.Thread(target=_w, daemon=True).start()
 app.include_router(dashboard_v2_router, prefix="/api/v2/dashboard", tags=["Dashboard V2"])
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+app.include_router(simulations_v2_router, prefix="/api/v2/simulations", tags=["Simulations V2"])
+app.include_router(intelligence_v3_router)
+app.include_router(ai_engineer_router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8080,http://localhost:8081,http://127.0.0.1:8080,http://127.0.0.1:8081").split(","),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -32,9 +58,109 @@ def home():
     return {"message": "API is running"}
 
 
+from datetime import datetime, timezone
+
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "healthy",
+        "version": APP_VERSION,
+        "build": APP_BUILD,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "uptime_seconds": None,
+    }
+
+@app.get("/circuits")
+def circuits():
+    return load_circuits()
+
+@app.get("/race-order")
+def race_order():
+    return {
+        "drivers": [
+            {"position": 1, "name": "Max Verstappen", "gap": "0.0s", "lap": 1},
+            {"position": 2, "name": "Lewis Hamilton", "gap": "+1.2s", "lap": 1},
+            {"position": 3, "name": "Charles Leclerc", "gap": "+2.8s", "lap": 1},
+            {"position": 4, "name": "Lando Norris", "gap": "+3.5s", "lap": 1},
+            {"position": 5, "name": "Carlos Sainz", "gap": "+4.9s", "lap": 1},
+            {"position": 6, "name": "George Russell", "gap": "+5.7s", "lap": 1},
+            {"position": 7, "name": "Sergio Perez", "gap": "+6.8s", "lap": 1},
+            {"position": 8, "name": "Fernando Alonso", "gap": "+7.4s", "lap": 1},
+            {"position": 9, "name": "Oscar Piastri", "gap": "+8.2s", "lap": 1},
+            {"position": 10, "name": "Pierre Gasly", "gap": "+9.1s", "lap": 1},
+        ]
+    }
+
+@app.get("/compounds")
+def compounds():
+    return load_compounds()
+
+@app.get("/weather-options")
+def weather_options():
+    return get_weather_options()
+
+@app.get("/degradation/{compound}")
+def degradation_curve(compound: str):
+    return get_degradation_curve(compound)
+
+@app.get("/knowledge/articles")
+def knowledge_articles():
+    return get_knowledge_articles()
+
+@app.get("/pipeline-health")
+def pipeline_health():
+    return {
+        "components": [
+            {"label": "Query Router", "value": 98, "desc": "Routes to appropriate agents based on intent classification", "color": "bg-[#E10600]"},
+            {"label": "Knowledge Retrieval", "value": 92, "desc": "ChromaDB vector store with hybrid search and reranking", "color": "bg-[#00C8FF]"},
+            {"label": "Simulation Engine", "value": 95, "desc": "Monte Carlo with weather, fuel, tyre, and traffic modelling", "color": "bg-[#00FF85]"},
+            {"label": "Confidence Scoring", "value": 87, "desc": "Multi-signal: RAG, simulation, historical, telemetry", "color": "bg-[#FFD400]"},
+            {"label": "Memory Store", "value": 91, "desc": "Persistent ChromaDB-backed with outcome tracking", "color": "bg-[#A855F7]"},
+            {"label": "Recommendation", "value": 89, "desc": "Aggregated decision with explainability chain", "color": "bg-[#FF8A00]"},
+        ]
+    }
+
+@app.get("/status")
+def status():
+    return {
+        "api": "online",
+        "version": APP_VERSION,
+        "build": APP_BUILD,
+        "memory": None,
+        "rag_available": True,
+    }
+
+@app.get("/version")
+def version():
+    return {
+        "version": APP_VERSION,
+        "build": APP_BUILD,
+        "name": "APEXiq Strategy OS",
+        "description": "Real-time F1 strategy intelligence engine",
+        "python_version": __import__("sys").version,
+    }
+
+import threading
+import time as time_module
+_start_time = time_module.time()
+
+@app.get("/metrics")
+def metrics():
+    elapsed = time_module.time() - _start_time
+    # Dynamically enumerate all registered API routes
+    endpoints = sorted(set(
+        r.path for r in app.routes
+        if hasattr(r, "path") and not r.path.startswith("/openapi")
+        and not r.path.startswith("/docs") and not r.path.startswith("/redoc")
+    ))
+    return {
+        "uptime_seconds": round(elapsed, 2),
+        "version": APP_VERSION,
+        "build": APP_BUILD,
+        "python_version": __import__("sys").version,
+        "endpoints": endpoints,
+        "memory_mb": None,
+    }
 
 
 @app.post("/strategy")
@@ -168,6 +294,11 @@ def monte_carlo(data: StrategyInput):
     podium_probability = (len([x for x in simulations if x <= 3]) / len(simulations)) * 100
     average_finish = (sum(simulations) / len(simulations))
 
+    pos_dist = []
+    for pos in range(1, 21):
+        count = simulations.count(pos)
+        pos_dist.append({"position": pos, "frequency": count})
+
     return {
         "win_probability": round(win_probability,1),
         "podium_probability": round(podium_probability, 1),
@@ -175,6 +306,7 @@ def monte_carlo(data: StrategyInput):
         "best_case": min(simulations),
         "worst_case": max(simulations),
         "simulations": len(simulations),
+        "position_distribution": pos_dist,
     }
 
 @app.post("/race-outcome")
@@ -205,9 +337,19 @@ def historical_comparison(circuit: str, strategy: str):
 def pit_accuracy(circuit: str, lap: int):
     return analyze_pit_accuracy(circuit, lap)
 
+@app.get("/drivers")
+def list_drivers():
+    from backend.services.data_service import load_drivers
+    return load_drivers()
+
 @app.get("/driver/{name}")
 def driver_profile(name: str):
     return get_driver(name)
+
+@app.get("/teams")
+def list_teams():
+    from backend.services.data_service import load_teams
+    return load_teams()
 
 @app.get("/team/{team}")
 def team_dna(team: str):
@@ -233,12 +375,36 @@ def learning_cases(circuit: str, tyre: str):
 
 @app.post("/ai-strategy-core")
 def ai_strategy_core(payload: dict):
+    driver_name = payload.get("driver")
+    team_name = payload.get("team")
+    driver_data = get_driver(driver_name) if driver_name else None
+    team_data = get_team(team_name) if team_name else None
+    comp = payload.get("comparison", {})
+    comparison = {
+        "recommended": comp.get("base", comp.get("recommended", "underCut")),
+        "strategy_risk": comp.get("strategy_risk", 5),
+    }
     return compute_ai_strategy(
         payload["strategy"],
-        payload["comparison"],
-        payload.get("driver"),
-        payload.get("team"),
+        comparison,
+        driver_data,
+        team_data,
         payload.get("learning"),
         payload.get("safety_car"),
         payload.get("weather"),
     )
+
+
+# ─── Telemetry Endpoints ──────────────────────────────────────────────────
+
+from backend.services.telemetry_simulator import generate_telemetry_snapshot, get_telemetry_history
+
+
+@app.get("/api/telemetry/live")
+def telemetry_live():
+    return generate_telemetry_snapshot()
+
+
+@app.get("/api/telemetry/history")
+def telemetry_history(count: int = 60):
+    return get_telemetry_history(count)

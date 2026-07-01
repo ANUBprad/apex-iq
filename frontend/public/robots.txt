@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://apexiq.vercel.app/sitemap.xml

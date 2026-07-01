@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd frontend && npx vite build",
+  "outputDirectory": "frontend/.vercel/output",
+  "framework": null,
+  "installCommand": "cd frontend && npm ci",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
