@@ -1,6 +1,15 @@
 venv/
-__pycache__/
-.env
 data/cache/
 *.pkl
 *.log
+
+# Chroma vector databases
+data/chroma_db/
+data/chroma_memory/
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Environment
+.env
