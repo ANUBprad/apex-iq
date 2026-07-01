@@ -8,6 +8,7 @@ import {
   CardSkeleton,
 } from "@/components/f1";
 import { motion } from "framer-motion";
+import { exportCSV } from "@/lib/export";
 import {
   useTelemetryLiveQuery,
   useTelemetryHistoryQuery,
@@ -493,6 +494,30 @@ function TelemetryPage() {
                   {data.session.lap}/{data.session.total_laps}
                 </span>
               </div>
+              <button
+                onClick={() =>
+                  exportCSV(
+                    [
+                      {
+                        speed: data.speed,
+                        rpm: data.rpm,
+                        gear: data.gear,
+                        throttle: data.throttle,
+                        brake: data.brake,
+                        ers_deploy: data.ers?.deploy_mode,
+                        lap: data.session.lap,
+                        position: data.session.position,
+                        timestamp: new Date().toISOString(),
+                      },
+                    ],
+                    `apexiq-telemetry-lap${data.session.lap}-${Date.now()}`,
+                  )
+                }
+                className="px-3 py-1.5 text-[9px] font-mono uppercase tracking-[0.08em] rounded-sm border border-[#262626] bg-[#101010] text-[#a0a0a0] hover:bg-[#141414] hover:text-white transition-all"
+                aria-label="Export telemetry data as CSV"
+              >
+                EXPORT ↓
+              </button>
             </div>
           )}
         </motion.div>
@@ -510,11 +535,11 @@ function TelemetryPage() {
             variants={container}
             initial="hidden"
             animate="show"
-            className="grid grid-cols-12 gap-4"
+            className="grid grid-cols-1 lg:grid-cols-12 gap-4"
           >
-            <div className="col-span-9 space-y-4">
+            <div className="col-span-12 lg:col-span-9 space-y-4">
               <FloatingPanel variant="glass" title="Car Telemetry">
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {gauges.map((g) => (
                     <TelemetryGauge
                       key={g.label}
@@ -529,7 +554,7 @@ function TelemetryPage() {
                 </div>
               </FloatingPanel>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <FloatingPanel variant="glass" title="Speed Trace">
                   <SpeedChart history={history} />
                   <div className="flex justify-between mt-1">
@@ -577,7 +602,7 @@ function TelemetryPage() {
               </div>
 
               <FloatingPanel variant="glass" title="Track Conditions">
-                <div className="grid grid-cols-6 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                   <MetricCard
                     label="Track Temp"
                     value={`${data.track.temp}°C`}
@@ -613,7 +638,7 @@ function TelemetryPage() {
               </FloatingPanel>
             </div>
 
-            <div className="col-span-3 space-y-3">
+            <div className="col-span-12 lg:col-span-3 space-y-3">
               <FloatingPanel variant="glass" title="Sector & Timing">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">

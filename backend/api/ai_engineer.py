@@ -275,7 +275,7 @@ def ai_engineer_chat(req: ChatRequest, http_request: Request):
     }
     pipeline_stages = []
     for node in ["rag", "simulate", "historical", "telemetry", "risk", "sync", "fusion"]:
-        status = "complete" if node in node_history else ("active" if node == node_history[-1] if node_history else False else "pending")
+        status = "complete" if node in node_history else ("active" if node_history and node == node_history[-1] else "pending")
         pipeline_stages.append({
             "name": stage_map.get(node, node),
             "status": status,

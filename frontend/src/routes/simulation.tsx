@@ -328,7 +328,7 @@ function SimulationPage() {
                     >
                       {mcData ? (
                         <div className="space-y-4">
-                          <div className="grid grid-cols-3 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <motion.div
                               whileHover={{ y: -2 }}
                               className="p-3 rounded-sm bg-[#101010] border border-[#262626] hover:border-[#333] transition-colors"

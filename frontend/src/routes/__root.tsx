@@ -11,6 +11,9 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { SearchModal } from "@/components/SearchModal";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { motion, AnimatePresence } from "framer-motion";
 import appCss from "../styles.css?url";
 
@@ -179,8 +182,12 @@ function RootComponent() {
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
+          <OfflineBanner />
+          <SearchModal />
           <AnimatePresence>{booting && <BootScreen />}</AnimatePresence>
-          <AppShell />
+          <ErrorBoundary>
+            <AppShell />
+          </ErrorBoundary>
         </QueryClientProvider>
         <Scripts />
       </body>
@@ -192,6 +199,7 @@ function AppShell() {
   const { location } = useRouterState();
   const navigate = useNavigate();
   const isLanding = location.pathname === "/";
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -205,8 +213,15 @@ function AppShell() {
         ];
         navigate({ to: routes[parseInt(e.key) - 1] as never });
       }
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        document.dispatchEvent(new CustomEvent("apexiq:search"));
+      }
+      if (e.key === "Escape" && sidebarOpen) {
+        setSidebarOpen(false);
+      }
     },
-    [navigate],
+    [navigate, sidebarOpen],
   );
 
   useEffect(() => {
@@ -226,8 +241,51 @@ function AppShell() {
       >
         Skip to main content
       </a>
-      <Sidebar />
-      <main id="main-content" className="lg:ml-[240px] flex-1 min-h-screen">
+
+      {/* Mobile header bar */}
+      <div className="fixed top-0 left-0 right-0 z-30 flex items-center h-[48px] border-b border-[#1E1E1E] bg-[#050505]/95 backdrop-blur-sm px-4 lg:hidden">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="flex items-center justify-center w-8 h-8 rounded-sm text-[#A0A0A0] hover:text-white hover:bg-[#141414] transition-colors"
+          aria-label={sidebarOpen ? "Close menu" : "Open menu"}
+          aria-expanded={sidebarOpen}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          >
+            {sidebarOpen ? (
+              <>
+                <line x1="3" y1="3" x2="13" y2="13" />
+                <line x1="13" y1="3" x2="3" y2="13" />
+              </>
+            ) : (
+              <>
+                <line x1="2" y1="4" x2="14" y2="4" />
+                <line x1="2" y1="8" x2="14" y2="8" />
+                <line x1="2" y1="12" x2="14" y2="12" />
+              </>
+            )}
+          </svg>
+        </button>
+        <span className="ml-3 text-sm font-bold text-white tracking-tight font-[family-name:var(--font-heading)]">
+          APEXiq
+        </span>
+      </div>
+
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      <main
+        id="main-content"
+        className="flex-1 min-h-screen pt-[48px] lg:pt-0 lg:ml-[240px]"
+        role="main"
+        aria-label="Main content"
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}

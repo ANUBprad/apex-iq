@@ -204,10 +204,10 @@ function AboutPage() {
                   variants={fadeUp}
                   className="flex items-start gap-3 pb-2 border-b border-[#262626] last:border-0"
                 >
-                  <span className="tabular-nums font-mono text-[13px] text-[#E10600] shrink-0 w-[4.5rem]">
+                  <span className="tabular-nums font-mono text-[13px] text-[#E10600] shrink-0 w-[3.5rem] sm:w-[4.5rem]">
                     {entry.version}
                   </span>
-                  <span className="tabular-nums font-mono text-[11px] text-[#666666] shrink-0 w-[5.5rem] pt-0.5">
+                  <span className="tabular-nums font-mono text-[11px] text-[#666666] shrink-0 w-[4.5rem] sm:w-[5.5rem] pt-0.5">
                     {entry.date}
                   </span>
                   <span className="text-[13px] text-[#CCCCCC] leading-snug">

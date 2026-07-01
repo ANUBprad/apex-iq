@@ -1,8 +1,17 @@
 import os
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel
 from random import gauss
+
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S",
+)
+logger = logging.getLogger("apexiq")
 
 from backend.schemas import StrategyInput
 
@@ -29,10 +38,14 @@ from backend.app.api.v2.endpoints.dashboard import router as dashboard_v2_router
 from backend.app.api.v2.endpoints.simulations import router as simulations_v2_router
 from backend.api.intelligence import router as intelligence_v3_router
 from backend.api.ai_engineer import router as ai_engineer_router
+from backend.api.mission_control import router as mission_control_router
 APP_VERSION = "4.5.0"
 APP_BUILD = "2025-Q2"
 
 app = FastAPI(title="F1 AI Race Engineer API", version=APP_VERSION)
+
+from backend.middleware import APITimingMiddleware
+app.add_middleware(APITimingMiddleware)
 
 
 @app.on_event("startup")
@@ -44,12 +57,17 @@ app.include_router(dashboard_v2_router, prefix="/api/v2/dashboard", tags=["Dashb
 app.include_router(simulations_v2_router, prefix="/api/v2/simulations", tags=["Simulations V2"])
 app.include_router(intelligence_v3_router)
 app.include_router(ai_engineer_router)
+app.include_router(mission_control_router)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8080,http://localhost:8081,http://127.0.0.1:8080,http://127.0.0.1:8081").split(","),
+    allow_origins=os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:3000,http://localhost:80,http://localhost:8080,http://127.0.0.1:3000",
+    ).split(","),
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["X-Request-ID", "X-Response-Time"],
 )
 
 
@@ -60,14 +78,21 @@ def home():
 
 from datetime import datetime, timezone
 
+import threading
+import time as time_module
+_start_time = time_module.time()
+
+
 @app.get("/health")
 def health():
+    elapsed = time_module.time() - _start_time
     return {
         "status": "healthy",
         "version": APP_VERSION,
         "build": APP_BUILD,
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "uptime_seconds": None,
+        "uptime_seconds": round(elapsed, 2),
+        "environment": os.getenv("ENVIRONMENT", "development"),
     }
 
 @app.get("/circuits")
@@ -140,9 +165,6 @@ def version():
         "python_version": __import__("sys").version,
     }
 
-import threading
-import time as time_module
-_start_time = time_module.time()
 
 @app.get("/metrics")
 def metrics():

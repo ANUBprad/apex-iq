@@ -1,177 +1,153 @@
-# Deployment Guide
+# APEXiq Production Deployment Checklist
 
-## Architecture
+## Pre-Deployment
 
-```
-                         ┌──────────┐
-                         │  Nginx   │  :80 (reverse proxy)
-                         └────┬─────┘
-                     ┌────────┴────────┐
-                     ▼                 ▼
-              ┌──────────┐     ┌──────────┐
-              │ Frontend │     │   API    │
-              │  :3000   │     │  :8000   │
-              │ React SSR│     │  FastAPI │
-              └──────────┘     └────┬─────┘
-                           ┌───────┴───────┐
-                           ▼               ▼
-                    ┌──────────┐     ┌──────────┐
-                    │    DB    │     │  Redis   │
-                    │PostgreSQL│     │  Cache   │
-                    └──────────┘     └──────────┘
-```
+- [ ] All tests passing (`pytest tests/ -v`)
+- [ ] Frontend lint clean (`cd frontend && npm run lint`)
+- [ ] Frontend build successful (`cd frontend && npm run build`)
+- [ ] Backend import verified (`python -c "from backend.main import app"`)
+- [ ] Environment variables configured in `.env`
+- [ ] Strong database password set
+- [ ] CORS origins configured for production domain
+- [ ] API keys generated and secured
 
----
-
-## Quick Start (Docker Compose)
+## Docker Deployment
 
 ```bash
-# Start all services
+# 1. Clone repository
+git clone <repo-url>
+cd APEXiq
+
+# 2. Create environment file
+cp .env.example .env
+# Edit .env with production values
+
+# 3. Build and start services
+docker compose build
 docker compose up -d
 
-# View logs
+# 4. Verify health
+docker compose ps
+curl http://localhost/health
+
+# 5. Check logs
+docker compose logs -f api
+docker compose logs -f frontend
+```
+
+## Cloud Deployment
+
+### Option A: Docker Compose (VPS/EC2)
+
+1. Provision Ubuntu 22.04+ server
+2. Install Docker and Docker Compose
+3. Clone repository and configure `.env`
+4. Run `docker compose up -d`
+5. Configure DNS to point to server IP
+6. Set up SSL with Certbot (see below)
+
+### Option B: Railway
+
+1. Connect GitHub repository
+2. Set environment variables in Railway dashboard
+3. Railway auto-deploys on push
+
+### Option C: Vercel (Frontend) + Railway (Backend)
+
+1. Frontend: Import `frontend/` directory to Vercel
+2. Backend: Deploy to Railway
+3. Set `VITE_API_URL` to Railway backend URL
+
+## SSL/HTTPS Setup
+
+### With Certbot (Docker)
+
+```bash
+# Install Certbot
+sudo apt install certbot
+
+# Stop nginx temporarily
+docker compose stop nginx
+
+# Get certificate
+sudo certbot certonly --standalone -d yourdomain.com
+
+# Update nginx.conf with SSL config
+# Mount certificates in docker-compose.yml
+
+# Restart
+docker compose up -d nginx
+```
+
+### With Cloudflare
+
+1. Add domain to Cloudflare
+2. Enable proxy (orange cloud)
+3. SSL/TLS mode: Full (Strict)
+4. No nginx SSL config needed
+
+## Post-Deployment Verification
+
+- [ ] Frontend loads at `https://yourdomain.com`
+- [ ] Backend API responds at `https://yourdomain.com/health`
+- [ ] Mission Control page loads with live data
+- [ ] Strategy Lab simulation runs successfully
+- [ ] AI Engineer chat responds
+- [ ] Telemetry data streams
+- [ ] No console errors in browser
+- [ ] No 5xx errors in nginx logs
+- [ ] Response times < 500ms for API calls
+
+## Monitoring
+
+### Health Check Endpoints
+
+| Endpoint | Description |
+|---|---|
+| `GET /health` | Full health status with uptime |
+| `GET /status` | API status and version |
+| `GET /metrics` | Detailed metrics and endpoints |
+
+### Log Monitoring
+
+```bash
+# View all logs
 docker compose logs -f
 
-# Stop
+# View specific service
+docker compose logs -f api
+docker compose logs -f frontend
+
+# View last 100 lines
+docker compose logs --tail=100 api
+```
+
+## Rollback Procedure
+
+```bash
+# Stop current deployment
 docker compose down
 
-# Stop and remove volumes (wipes DB)
-docker compose down -v
+# Checkout previous version
+git checkout <previous-commit>
+
+# Rebuild and restart
+docker compose build
+docker compose up -d
 ```
 
-### Environment Variables
+## Troubleshooting
 
-Create `.env` in project root to override defaults:
+### API won't start
+- Check database connection: `docker compose exec api python -c "import psycopg2; psycopg2.connect('${DATABASE_URL}')"`
+- Check Redis connection: `docker compose exec redis redis-cli ping`
 
-```env
-POSTGRES_USER=apexiq
-POSTGRES_PASSWORD=your_secure_password
-POSTGRES_DB=apexiq
-DATABASE_URL=postgresql+asyncpg://apexiq:your_secure_password@db:5432/apexiq
-CORS_ORIGINS=http://localhost:3000,http://localhost:8000
-LOG_LEVEL=info
-```
+### Frontend can't reach API
+- Verify CORS_ORIGINS includes frontend URL
+- Check nginx configuration
+- Verify API health: `curl http://localhost:8000/health`
 
-| Variable | Default | Description |
-|---|---|---|
-| `POSTGRES_USER` | `apexiq` | DB user |
-| `POSTGRES_PASSWORD` | `apexiq_pass` | DB password |
-| `POSTGRES_DB` | `apexiq` | DB name |
-| `POSTGRES_PORT` | `5432` | DB host port |
-| `REDIS_PORT` | `6379` | Redis host port |
-| `API_PORT` | `8000` | API host port |
-| `FRONTEND_PORT` | `3000` | Frontend host port |
-| `NGINX_PORT` | `80` | Nginx host port |
-| `DATABASE_URL` | `postgresql+asyncpg://apexiq:apexiq_pass@db:5432/apexiq` | Full connection string |
-| `CELERY_BROKER_URL` | `redis://redis:6379/0` | Celery broker |
-| `CELERY_RESULT_BACKEND` | `redis://redis:6379/0` | Celery backend |
-| `CORS_ORIGINS` | `http://localhost:3000,http://localhost:8000` | Allowed CORS origins |
-| `LOG_LEVEL` | `info` | Backend log level |
-
----
-
-## Local Development (without Docker)
-
-```bash
-# Terminal 1: Backend
-cd backend
-pip install -r ../requirements.txt
-uvicorn backend.main:app --reload --port 8000
-
-# Terminal 2: Frontend
-cd frontend
-npm install
-npm run dev
-# Opens at http://localhost:3000
-```
-
----
-
-## Production Build
-
-### Frontend (standalone)
-
-```bash
-cd frontend
-npm ci
-npm run build
-node dist/server/server.js
-```
-
-### Backend (standalone)
-
-```bash
-docker build -t apexiq-backend -f docker/backend.Dockerfile .
-docker run -p 8000:8000 apexiq-backend
-```
-
----
-
-## Vercel Deploy (Frontend)
-
-```bash
-cd frontend
-npm ci
-npm run build
-npx vercel --prod
-```
-
-Vercel config: `deploy/vercel.json`
-
-### Environment Variables
-| Variable | Description | Default |
-|---|---|---|
-| `VITE_API_URL` | Backend API URL | `http://127.0.0.1:8000` |
-
----
-
-## Railway Deploy (Backend)
-
-- Connect GitHub repo to Railway
-- Railway auto-detects `docker/backend.Dockerfile`
-- Set `PORT=8000` in Railway environment variables
-- Health check: `/health`
-
-Railway config: `deploy/railway.toml`
-
----
-
-## Docker Builds
-
-### Frontend Dockerfile
-- Multi-stage: `node:22-alpine`
-- Stage 1 instals deps and runs `npm run build`
-- Stage 2 serves via `node dist/server/server.js`
-- Location: `docker/frontend.Dockerfile`
-
-### Backend Dockerfile
-- Single stage: `python:3.12-slim`
-- Instals system deps (build-essential, libpq-dev)
-- Location: `docker/backend.Dockerfile`
-
----
-
-## Nginx Reverse Proxy
-
-When using Docker Compose, Nginx routes:
-- `/` → Frontend (port 3000)
-- `/api/` → Backend (port 8000)
-- `/health` → Backend health check
-
-Config: `deploy/nginx.conf`
-
----
-
-## CI/CD
-
-GitHub Actions workflow at `.github/workflows/ci.yml`:
-
-### On push/PR to `main`:
-
-1. **Frontend job**: `npm ci` → `npm run lint` → `tsc --noEmit` → `npm run build`
-2. **Backend job**: `pip install` → `ruff check` → `pytest`
-
-### Deployment (requires platform integration):
-- Vercel: auto-deploys frontend from `main`
-- Railway: auto-deploys backend from `main` via Dockerfile
-- Docker Compose: manual deploy on VPS/cloud VM
+### High memory usage
+- Reduce Celery workers: `--concurrency=1`
+- Check for memory leaks in logs
+- Scale horizontally with multiple replicas

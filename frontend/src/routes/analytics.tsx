@@ -166,11 +166,11 @@ function AnalyticsPage() {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-7 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="col-span-12 lg:col-span-7 space-y-4">
             <motion.div variants={fadeUp} whileHover={{ y: -2 }}>
               <FloatingPanel title="Driver Profile">
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
                   <MetricCard
                     label="Name"
                     value={driver?.name ?? "—"}
@@ -200,7 +200,7 @@ function AnalyticsPage() {
                     color="green"
                     size="md"
                   />
-                  <div className="grid grid-cols-3 gap-3 mt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
                     <TelemetryGauge
                       label="Aggression"
                       value={driver?.aggression ?? 0}
@@ -226,7 +226,7 @@ function AnalyticsPage() {
 
             <motion.div variants={fadeUp}>
               <FloatingPanel title="Performance Metrics">
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <MetricCard
                     label="Aggression"
                     value={driver?.aggression ?? "—"}
@@ -256,11 +256,11 @@ function AnalyticsPage() {
             </motion.div>
           </div>
 
-          <div className="col-span-5 space-y-4">
+          <div className="col-span-12 lg:col-span-5 space-y-4">
             <motion.div variants={fadeUp} whileHover={{ y: -2 }}>
               <FloatingPanel title="Team Profile">
                 <div className="space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <MetricCard
                       label="Name"
                       value={team?.name ?? "—"}
@@ -347,8 +347,8 @@ function AnalyticsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="col-span-12 lg:col-span-4">
             <motion.div variants={fadeUp}>
               <FloatingPanel title="Pit Stop Analysis">
                 <div className="space-y-2">

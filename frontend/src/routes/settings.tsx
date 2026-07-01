@@ -7,6 +7,7 @@ import {
   useV3HealthQuery,
   useMetricsQuery,
 } from "@/hooks/useApiQueries";
+import { useSettings } from "@/hooks/useSettings";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
@@ -56,15 +57,13 @@ export const Route = createFileRoute("/settings")({
 });
 
 function SettingsPage() {
+  const { settings, update } = useSettings();
   const [notifications, setNotifications] = useState({
     "notif-race-start": true,
     "notif-strategy": true,
     "notif-weather": false,
     "notif-errors": true,
   });
-  const [theme, setTheme] = useState("Carbon Fiber");
-  const [refreshInterval, setRefreshInterval] = useState("10 seconds");
-  const [animations, setAnimations] = useState(true);
   const { data: status } = useStatusQuery();
   const { data: v3Health } = useV3HealthQuery();
   const { data: metrics } = useMetricsQuery();
@@ -151,7 +150,7 @@ function SettingsPage() {
                   <label
                     key={t}
                     className={`flex items-center gap-2 p-2 rounded-sm border cursor-pointer transition-colors ${
-                      theme === t
+                      settings.theme === t
                         ? "bg-[#1A1A1A] border-[#E10600]/50"
                         : "bg-[#141414] border-[#262626] hover:border-[#333]"
                     }`}
@@ -159,8 +158,8 @@ function SettingsPage() {
                     <input
                       type="radio"
                       name="theme"
-                      checked={theme === t}
-                      onChange={() => setTheme(t)}
+                      checked={settings.theme === t}
+                      onChange={() => update({ theme: t as "dark" | "light" })}
                       className="accent-[#E10600]"
                     />
                     <span className="text-xs text-[#A0A0A0]">{t}</span>
@@ -214,23 +213,26 @@ function SettingsPage() {
                   Auto-refresh interval
                 </label>
                 <select
-                  value={refreshInterval}
-                  onChange={(e) => setRefreshInterval(e.target.value)}
+                  value={settings.telemetryRefreshMs}
+                  onChange={(e) =>
+                    update({ telemetryRefreshMs: parseInt(e.target.value) })
+                  }
                   className="w-full bg-[#141414] border border-[#262626] rounded-sm p-2 text-xs text-white focus:outline-none focus:border-[#E10600]/50"
                 >
-                  <option>5 seconds</option>
-                  <option>10 seconds</option>
-                  <option>30 seconds</option>
-                  <option>60 seconds</option>
-                  <option>Manual only</option>
+                  <option value={2000}>2 seconds</option>
+                  <option value={5000}>5 seconds</option>
+                  <option value={10000}>10 seconds</option>
+                  <option value={30000}>30 seconds</option>
                 </select>
               </div>
               <label className="flex items-center gap-2 p-2 rounded-sm bg-[#141414] border border-[#262626] hover:border-[#333] transition-colors cursor-pointer">
                 <input
                   type="checkbox"
                   id="refresh-animations"
-                  checked={animations}
-                  onChange={() => setAnimations((p) => !p)}
+                  checked={settings.animationsEnabled}
+                  onChange={() =>
+                    update({ animationsEnabled: !settings.animationsEnabled })
+                  }
                   className="accent-[#E10600]"
                 />
                 <span className="text-xs text-[#A0A0A0]">

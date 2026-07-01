@@ -23,6 +23,7 @@ import {
 } from "@/hooks/useApiQueries";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import type { StrategyInput } from "@/lib/api";
+import { exportJSON } from "@/lib/export";
 
 const container = {
   hidden: { opacity: 0 },
@@ -435,6 +436,23 @@ function StrategyLabPage() {
                 "Run Simulation"
               )}
             </button>
+            {strategyData && (
+              <button
+                onClick={() =>
+                  exportJSON(
+                    {
+                      strategy: strategyData,
+                      timestamp: new Date().toISOString(),
+                    },
+                    `apexiq-strategy-${strategyData.circuit_id}-${Date.now()}`,
+                  )
+                }
+                className="px-3 py-1.5 text-[9px] font-mono uppercase tracking-[0.08em] rounded-sm border border-[#262626] bg-[#101010] text-[#a0a0a0] hover:bg-[#141414] hover:text-white transition-all"
+                aria-label="Export strategy report"
+              >
+                EXPORT ↓
+              </button>
+            )}
           </div>
         </motion.div>
 
@@ -443,9 +461,9 @@ function StrategyLabPage() {
             variants={container}
             initial="hidden"
             animate="show"
-            className="grid grid-cols-12 gap-4"
+            className="grid grid-cols-1 lg:grid-cols-12 gap-4"
           >
-            <div className="col-span-3 space-y-3">
+            <div className="col-span-12 lg:col-span-3 space-y-3">
               <FloatingPanel variant="glass" title="Race Configuration">
                 <div className="space-y-3">
                   <SelectControl
@@ -672,7 +690,7 @@ function StrategyLabPage() {
               </FloatingPanel>
             </div>
 
-            <div className="col-span-9 space-y-4">
+            <div className="col-span-12 lg:col-span-9 space-y-4">
               <AnimatePresence mode="wait">
                 {simRunning && (
                   <motion.div
@@ -691,7 +709,7 @@ function StrategyLabPage() {
               {simRunning && (
                 <div className="space-y-4">
                   <CardSkeleton lines={4} />
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <CardSkeleton lines={2} />
                     <CardSkeleton lines={2} />
                     <CardSkeleton lines={2} />
@@ -730,7 +748,7 @@ function StrategyLabPage() {
                             </p>
                           </div>
                         </div>
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
                           <div className="p-2.5 rounded-sm bg-[#141414]/60 border border-[#262626]">
                             <span className="text-[9px] text-[#666] font-mono block">
                               Optimal Pit Lap
@@ -797,7 +815,7 @@ function StrategyLabPage() {
                     )}
                   </FloatingPanel>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <FloatingPanel variant="compact" title="Race Outcome">
                       {raceOutcomeData ? (
                         <div className="space-y-2">
@@ -1004,7 +1022,7 @@ function StrategyLabPage() {
           >
             <div className="col-span-12">
               <FloatingPanel variant="glass" title="Tyre Degradation Model">
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                   {[
                     {
                       label: "Soft (C5)",
@@ -1146,9 +1164,9 @@ function StrategyLabPage() {
             variants={container}
             initial="hidden"
             animate="show"
-            className="grid grid-cols-12 gap-4"
+            className="grid grid-cols-1 lg:grid-cols-12 gap-4"
           >
-            <div className="col-span-8">
+            <div className="col-span-12 lg:col-span-8">
               <FloatingPanel variant="glass" title="Historical Race Data">
                 {historicalQuery.data && historicalQuery.data.length > 0 ? (
                   <div className="space-y-2">
@@ -1193,7 +1211,7 @@ function StrategyLabPage() {
               </FloatingPanel>
             </div>
 
-            <div className="col-span-4 space-y-3">
+            <div className="col-span-12 lg:col-span-4 space-y-3">
               <FloatingPanel variant="compact" title="Strategy Performance">
                 {histComparisonQuery.data ? (
                   <div className="space-y-2">

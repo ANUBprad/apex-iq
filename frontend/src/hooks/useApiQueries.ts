@@ -76,6 +76,8 @@ import {
   aiEngineerChat,
   type AIEngineerRequest,
   type AIEngineerResponse,
+  getMissionControlSnapshot,
+  type MissionControlSnapshot,
 } from "@/lib/api";
 
 // ─── V2 Dashboard ──────────────────────────────────────────────────────────
@@ -492,7 +494,10 @@ export function useRaceOutcomeQuery(params: StrategyInput, enabled = true) {
   });
 }
 
-export function useSafetyCarQueryEnabled(params: StrategyInput, enabled = true) {
+export function useSafetyCarQueryEnabled(
+  params: StrategyInput,
+  enabled = true,
+) {
   return useQuery<SafetyCarResponse>({
     queryKey: ["safety-car-lab", params],
     queryFn: () => getSafetyCarAnalysis(params),
@@ -502,12 +507,25 @@ export function useSafetyCarQueryEnabled(params: StrategyInput, enabled = true) 
   });
 }
 
-export function useSimulationQueryEnabled(params: StrategyInput, enabled = true) {
+export function useSimulationQueryEnabled(
+  params: StrategyInput,
+  enabled = true,
+) {
   return useQuery<SimulationResponse>({
     queryKey: ["simulation-lab", params],
     queryFn: () => getSimulation(params),
     enabled,
     retry: 1,
     staleTime: 15_000,
+  });
+}
+
+export function useMissionControlQuery(refetchInterval = 2000) {
+  return useQuery<MissionControlSnapshot>({
+    queryKey: ["mission-control"],
+    queryFn: getMissionControlSnapshot,
+    refetchInterval,
+    retry: 1,
+    staleTime: 1000,
   });
 }

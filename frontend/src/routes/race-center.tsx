@@ -320,8 +320,8 @@ function RaceCenterPage() {
           ))}
         </motion.div>
 
-        <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-8 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="col-span-12 lg:col-span-8 space-y-4">
             <motion.div variants={swimLane}>
               <FloatingPanel
                 title="AI Recommendation"
@@ -413,7 +413,7 @@ function RaceCenterPage() {
                     variants={container}
                     initial="hidden"
                     animate="show"
-                    className="grid grid-cols-3 gap-4"
+                    className="grid grid-cols-1 sm:grid-cols-3 gap-4"
                   >
                     <motion.div variants={item}>
                       <FloatingPanel variant="compact" title="Race Metrics">
@@ -672,7 +672,7 @@ function RaceCenterPage() {
                     animate="show"
                   >
                     <FloatingPanel title="Race Prediction">
-                      <div className="grid grid-cols-4 gap-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         {[
                           {
                             label: "Win Probability",
@@ -735,7 +735,7 @@ function RaceCenterPage() {
             </AnimatePresence>
           </div>
 
-          <div className="col-span-4 space-y-4">
+          <div className="col-span-12 lg:col-span-4 space-y-4">
             <motion.div variants={swimLane}>
               <FloatingPanel variant="compact" title="Race Progress">
                 <RaceClock

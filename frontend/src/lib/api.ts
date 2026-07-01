@@ -911,7 +911,117 @@ export async function aiEngineerContext(circuit: string): Promise<{
   historical_races: number;
   recent_races: unknown[];
 }> {
-  return fetchApi(
-    `/api/ai-engineer/context/${encodeURIComponent(circuit)}`,
-  );
+  return fetchApi(`/api/ai-engineer/context/${encodeURIComponent(circuit)}`);
+}
+
+// ── Mission Control ──────────────────────────────────────────────
+
+export interface MissionControlRadio {
+  message: string;
+  timestamp: string;
+  sender?: string;
+}
+
+export interface MissionControlTimelineEvent {
+  lap: number;
+  type:
+    | "pit"
+    | "overtake"
+    | "sc"
+    | "vsc"
+    | "rain"
+    | "ai"
+    | "strategy"
+    | "start"
+    | "tyre";
+  label: string;
+  detail?: string;
+}
+
+export interface MissionControlSnapshot {
+  telemetry: TelemetrySnapshot;
+  race_state: {
+    circuit: string;
+    driver: string;
+    team: string;
+    lap: number;
+    total_laps: number;
+    progress: number;
+    position: number;
+    status: string;
+    elapsed_seconds: number;
+  };
+  ai_recommendation: {
+    action: string;
+    confidence: number;
+    risk_level: string;
+    risk_factors: string[];
+    reasoning: string;
+    alternative: string;
+    strategy_score: number;
+  };
+  predictions: {
+    win_probability: number;
+    podium_probability: number;
+    top5_probability: number;
+    safety_car_probability: number;
+    rain_probability: number;
+    undercut_success: number;
+    overcut_success: number;
+    fuel_finish_probability: number;
+    prediction_confidence: number;
+  };
+  kpis: {
+    race_score: number;
+    strategy_efficiency: number;
+    ai_confidence: number;
+    simulation_agreement: number;
+    tyre_health: number;
+    fuel_target: number;
+    risk_level: string;
+    prediction_accuracy: number;
+  };
+  system_health: {
+    api_latency_ms: number;
+    telemetry_connection: string;
+    knowledge_status: string;
+    memory_status: string;
+    simulation_status: string;
+    pipeline_status: string;
+    rag_documents: number;
+    memory_entries: number;
+  };
+  historical_comparison: {
+    circuit: string;
+    total_races: number;
+    recent_races: {
+      race: string;
+      year: number;
+      winner: string;
+      strategy: string;
+      safety_cars: number;
+    }[];
+    similarity: number;
+    delta: string;
+    indicator: string;
+  };
+  memory: {
+    recent_conversations: number;
+    saved_strategies: number;
+    entries: { query: string; circuit: string; confidence: number }[];
+  };
+  timeline_events: MissionControlTimelineEvent[];
+  weather: {
+    condition: string;
+    air_temp: number;
+    track_temp: number;
+    humidity: number;
+    wind_speed: number;
+    rain_probability: number;
+  };
+  radio: MissionControlRadio[];
+}
+
+export async function getMissionControlSnapshot(): Promise<MissionControlSnapshot> {
+  return fetchApi("/api/mission-control/snapshot");
 }

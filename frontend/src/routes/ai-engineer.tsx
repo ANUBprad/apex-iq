@@ -383,7 +383,7 @@ function AIEngineerPage() {
                 title="Race Context"
                 className="p-3"
               >
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <SelectControl
                     label="Circuit"
                     value={circuit}
@@ -610,7 +610,7 @@ function AIEngineerPage() {
               </FloatingPanel>
             </motion.div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <motion.div variants={fadeUp}>
                 <FloatingPanel variant="compact" title="Confidence & Trust">
                   {latestData ? (
@@ -721,7 +721,7 @@ function AIEngineerPage() {
             {latestData && latestData.alternatives.length > 0 && (
               <motion.div variants={fadeUp}>
                 <FloatingPanel variant="compact" title="Strategy Comparison">
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {latestData.alternatives.map((alt, i) => (
                       <motion.div
                         key={i}
@@ -829,7 +829,7 @@ function AIEngineerPage() {
                   variant="compact"
                   title="Historical & Simulation"
                 >
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <span className="text-[9px] text-[#666] font-mono uppercase tracking-wider">
                         Historical

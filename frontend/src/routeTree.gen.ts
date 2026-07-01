@@ -14,6 +14,7 @@ import { Route as StrategyLabRouteImport } from './routes/strategy-lab'
 import { Route as SimulationRouteImport } from './routes/simulation'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RaceCenterRouteImport } from './routes/race-center'
+import { Route as MissionControlRouteImport } from './routes/mission-control'
 import { Route as MemoryRouteImport } from './routes/memory'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
@@ -44,6 +45,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const RaceCenterRoute = RaceCenterRouteImport.update({
   id: '/race-center',
   path: '/race-center',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionControlRoute = MissionControlRouteImport.update({
+  id: '/mission-control',
+  path: '/mission-control',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MemoryRoute = MemoryRouteImport.update({
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AnalyticsRoute
   '/knowledge': typeof KnowledgeRoute
   '/memory': typeof MemoryRoute
+  '/mission-control': typeof MissionControlRoute
   '/race-center': typeof RaceCenterRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AnalyticsRoute
   '/knowledge': typeof KnowledgeRoute
   '/memory': typeof MemoryRoute
+  '/mission-control': typeof MissionControlRoute
   '/race-center': typeof RaceCenterRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/analytics': typeof AnalyticsRoute
   '/knowledge': typeof KnowledgeRoute
   '/memory': typeof MemoryRoute
+  '/mission-control': typeof MissionControlRoute
   '/race-center': typeof RaceCenterRoute
   '/settings': typeof SettingsRoute
   '/simulation': typeof SimulationRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/knowledge'
     | '/memory'
+    | '/mission-control'
     | '/race-center'
     | '/settings'
     | '/simulation'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/knowledge'
     | '/memory'
+    | '/mission-control'
     | '/race-center'
     | '/settings'
     | '/simulation'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/knowledge'
     | '/memory'
+    | '/mission-control'
     | '/race-center'
     | '/settings'
     | '/simulation'
@@ -166,6 +178,7 @@ export interface RootRouteChildren {
   AnalyticsRoute: typeof AnalyticsRoute
   KnowledgeRoute: typeof KnowledgeRoute
   MemoryRoute: typeof MemoryRoute
+  MissionControlRoute: typeof MissionControlRoute
   RaceCenterRoute: typeof RaceCenterRoute
   SettingsRoute: typeof SettingsRoute
   SimulationRoute: typeof SimulationRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/race-center'
       fullPath: '/race-center'
       preLoaderRoute: typeof RaceCenterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mission-control': {
+      id: '/mission-control'
+      path: '/mission-control'
+      fullPath: '/mission-control'
+      preLoaderRoute: typeof MissionControlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/memory': {
@@ -262,6 +282,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnalyticsRoute: AnalyticsRoute,
   KnowledgeRoute: KnowledgeRoute,
   MemoryRoute: MemoryRoute,
+  MissionControlRoute: MissionControlRoute,
   RaceCenterRoute: RaceCenterRoute,
   SettingsRoute: SettingsRoute,
   SimulationRoute: SimulationRoute,
