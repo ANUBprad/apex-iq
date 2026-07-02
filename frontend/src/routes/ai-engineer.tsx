@@ -330,7 +330,7 @@ function AIEngineerPage() {
   const metrics = metricsQuery.data;
 
   return (
-    <div className="min-h-screen carbon-fiber">
+    <div className="min-h-screen bg-[#050505]">
       <div className="absolute inset-0 ambient-glow-right pointer-events-none" />
       <motion.div
         variants={container}
@@ -338,41 +338,57 @@ function AIEngineerPage() {
         animate="show"
         className="relative z-[1] p-5 space-y-4"
       >
+        {/* Hero — Chat-First Interface */}
         <motion.div
           variants={fadeUp}
-          className="flex items-center justify-between"
+          className="mb-3 rounded-sm border border-white/10 bg-gradient-to-r from-white/5 via-transparent to-white/5 p-5 text-center"
         >
-          <div>
-            <h1 className="text-lg font-bold text-white font-[family-name:var(--font-heading)] tracking-tight">
-              AI Engineer Console
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <div className="w-[2px] h-6 rounded-full bg-white" />
+            <h1 className="text-xl font-bold text-white font-[family-name:var(--font-heading)] tracking-tight">
+              AI Race Engineer
             </h1>
-            <div className="flex items-center gap-3 mt-1">
-              <div className="flex items-center gap-1.5">
-                <motion.span
-                  animate={{ opacity: [1, 0.3, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="w-1.5 h-1.5 rounded-full bg-[#00C8FF]"
-                />
-                <span className="text-[9px] text-[#00C8FF] font-mono tracking-[0.1em]">
-                  AI ACTIVE
-                </span>
-              </div>
-              <span className="text-[10px] text-[#666] font-mono">
-                {metrics?.agents_available ?? 0} agents ·{" "}
-                {metrics?.pipeline_depth ?? 0} stages
+          </div>
+          <p className="text-[11px] text-[#555] mb-3">
+            Multi-agent intelligence pipeline · {metrics?.agents_available ?? 0}{" "}
+            agents · {metrics?.pipeline_depth ?? 0} stages
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {[
+              "Should we pit?",
+              "Fuel strategy",
+              "Tyre degradation",
+              "Safety Car prediction",
+              "Rain strategy",
+            ].map((chip) => (
+              <button
+                key={chip}
+                onClick={() => {
+                  setInput(chip);
+                  setTimeout(() => inputRef.current?.focus(), 50);
+                }}
+                className="rounded-sm border border-[#222] bg-[#111] px-3 py-1.5 text-[11px] text-[#888] hover:border-[#444] hover:text-white transition-all"
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center justify-center gap-3 mt-3">
+            <div className="flex items-center gap-1.5">
+              <motion.span
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="w-1.5 h-1.5 rounded-full bg-white"
+              />
+              <span className="text-[10px] text-[#555] font-mono">
+                AI Active
               </span>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
             {telemetryQuery.data && (
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-sm bg-[#141414] border border-[#262626]">
-                <motion.span
-                  animate={{ opacity: [1, 0.3, 1] }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                  className="w-1 h-1 rounded-full bg-[#00FF85]"
-                />
-                <span className="text-[8px] text-[#666] font-mono">
-                  TELEMETRY LIVE
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-sm bg-[#111] border border-[#222]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00FF85]" />
+                <span className="text-[10px] text-[#555] font-mono">
+                  Telemetry Live
                 </span>
               </div>
             )}

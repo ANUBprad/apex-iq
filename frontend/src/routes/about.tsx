@@ -102,11 +102,27 @@ const versionHistory = [
 ];
 
 function AboutPage() {
-  const { data: health } = useSystemHealthQuery();
+  const { data: health, isLoading } = useSystemHealthQuery();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-6 h-6 border-2 border-[#E10600] border-t-transparent rounded-full mx-auto"
+          />
+          <span className="text-[11px] text-[#555] font-mono">
+            Loading system info...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen carbon-fiber">
-      <div className="ambient-glow-right pointer-events-none fixed inset-0" />
+    <div className="min-h-screen bg-[#050505]">
       <motion.div
         variants={container}
         initial="hidden"

@@ -8,7 +8,6 @@ import {
   CardSkeleton,
 } from "@/components/f1";
 import { motion } from "framer-motion";
-import { exportCSV } from "@/lib/export";
 import {
   useTelemetryLiveQuery,
   useTelemetryHistoryQuery,
@@ -437,87 +436,140 @@ function TelemetryPage() {
     ];
   }, [data]);
 
+  if (liveQuery.isError && !liveQuery.isLoading) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <div className="w-8 h-8 rounded-full bg-[#E10600]/10 border border-[#E10600]/30 flex items-center justify-center mx-auto">
+            <span className="text-[#E10600] text-sm">!</span>
+          </div>
+          <div>
+            <span className="text-[11px] text-white font-medium block">
+              Telemetry connection failed
+            </span>
+            <span className="text-[10px] text-[#555] font-mono block mt-1">
+              {liveQuery.error?.message ?? "Backend unreachable"}
+            </span>
+          </div>
+          <button
+            onClick={() => liveQuery.refetch()}
+            className="h-7 px-3 text-[10px] bg-[#111] border border-[#222] text-[#888] hover:text-white hover:border-[#444] rounded-sm transition-all"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen carbon-fiber">
-      <div className="absolute inset-0 ambient-glow-left pointer-events-none" />
+    <div className="min-h-screen bg-[#050505]">
       <motion.div
         variants={container}
         initial="hidden"
         animate="show"
         className="relative z-[1] p-5 space-y-4"
       >
+        {/* Hero — Digital Dashboard */}
         <motion.div
           variants={fadeUp}
-          className="flex items-center justify-between"
+          className="mb-3 rounded-sm border border-[#0066FF]/20 bg-gradient-to-r from-[#0066FF]/5 via-transparent to-[#0066FF]/5 p-4"
         >
-          <div className="flex items-center gap-3">
-            <h1 className="text-lg font-bold text-white font-[family-name:var(--font-heading)] tracking-tight">
-              Live Telemetry
-            </h1>
-            <div className="flex items-center gap-1.5">
-              <StatusDot
-                status={liveQuery.isLoading ? "warning" : "online"}
-                size="sm"
-              />
-              <span className="text-[9px] text-[#666] font-mono uppercase tracking-wider">
-                {liveQuery.isLoading ? "Connecting" : "Live"}
-              </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-[2px] h-8 rounded-full bg-[#0066FF]" />
+                <div>
+                  <h1 className="text-xl font-bold text-white font-[family-name:var(--font-heading)] tracking-tight">
+                    Telemetry
+                  </h1>
+                  <p className="text-[10px] text-[#555] mt-0.5">
+                    Vehicle data · {data?.session.driver ?? "—"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-[#0066FF]/10 border border-[#0066FF]/30 rounded-sm">
+                <StatusDot
+                  status={liveQuery.isLoading ? "warning" : "online"}
+                  size="sm"
+                />
+                <span className="text-[10px] text-[#0066FF] font-mono font-medium tracking-wider">
+                  {liveQuery.isLoading ? "Connecting" : "Live"}
+                </span>
+              </div>
             </div>
+            {data && (
+              <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-sm bg-[#111] border border-[#222]">
+                  <span className="text-[9px] text-[#555] font-mono">
+                    SESSION
+                  </span>
+                  <span
+                    className={`text-[10px] font-mono font-bold ${data.session.status === "RACING" ? "text-[#00FF85]" : data.session.status === "SAFETY_CAR" ? "text-[#FFD400]" : "text-[#E10600]"}`}
+                  >
+                    {data.session.status}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-sm bg-[#111] border border-[#222]">
+                  <span className="text-[9px] text-[#555] font-mono">POS</span>
+                  <span className="text-[10px] text-white font-mono font-bold">
+                    P{data.session.position}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-sm bg-[#111] border border-[#222]">
+                  <span className="text-[9px] text-[#555] font-mono">LAP</span>
+                  <span className="text-[10px] text-white font-mono font-bold">
+                    {data.session.lap}/{data.session.total_laps}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
           {data && (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-[#141414] border border-[#262626]">
-                <span className="text-[9px] text-[#666] font-mono">
-                  SESSION
+            <div className="mt-3 grid grid-cols-5 gap-3 text-center">
+              <div className="rounded-sm bg-[#141414] border border-[#262626] p-2">
+                <span className="text-[9px] text-[#666] font-mono tracking-[0.1em] uppercase">
+                  Speed
                 </span>
-                <span
-                  className={`text-[10px] font-mono font-bold ${
-                    data.session.status === "RACING"
-                      ? "text-[#00FF85]"
-                      : data.session.status === "SAFETY_CAR"
-                        ? "text-[#FFD400]"
-                        : "text-[#E10600]"
-                  }`}
-                >
-                  {data.session.status}
-                </span>
+                <p className="text-lg text-white font-mono font-bold">
+                  {data.speed}
+                  <span className="text-[10px] text-[#666]"> km/h</span>
+                </p>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-[#141414] border border-[#262626]">
-                <span className="text-[9px] text-[#666] font-mono">POS</span>
-                <span className="text-[10px] text-white font-mono font-bold">
-                  P{data.session.position}
+              <div className="rounded-sm bg-[#141414] border border-[#262626] p-2">
+                <span className="text-[9px] text-[#666] font-mono tracking-[0.1em] uppercase">
+                  RPM
                 </span>
+                <p className="text-lg text-white font-mono font-bold">
+                  {data.rpm.toLocaleString()}
+                </p>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-[#141414] border border-[#262626]">
-                <span className="text-[9px] text-[#666] font-mono">LAP</span>
-                <span className="text-[10px] text-white font-mono font-bold">
-                  {data.session.lap}/{data.session.total_laps}
+              <div className="rounded-sm bg-[#141414] border border-[#262626] p-2">
+                <span className="text-[9px] text-[#666] font-mono tracking-[0.1em] uppercase">
+                  Gear
                 </span>
+                <p className="text-lg text-white font-mono font-bold">
+                  {data.gear}
+                </p>
               </div>
-              <button
-                onClick={() =>
-                  exportCSV(
-                    [
-                      {
-                        speed: data.speed,
-                        rpm: data.rpm,
-                        gear: data.gear,
-                        throttle: data.throttle,
-                        brake: data.brake,
-                        ers_deploy: data.ers?.deploy_mode,
-                        lap: data.session.lap,
-                        position: data.session.position,
-                        timestamp: new Date().toISOString(),
-                      },
-                    ],
-                    `apexiq-telemetry-lap${data.session.lap}-${Date.now()}`,
-                  )
-                }
-                className="px-3 py-1.5 text-[9px] font-mono uppercase tracking-[0.08em] rounded-sm border border-[#262626] bg-[#101010] text-[#a0a0a0] hover:bg-[#141414] hover:text-white transition-all"
-                aria-label="Export telemetry data as CSV"
-              >
-                EXPORT ↓
-              </button>
+              <div className="rounded-sm bg-[#141414] border border-[#262626] p-2">
+                <span className="text-[9px] text-[#666] font-mono tracking-[0.1em] uppercase">
+                  Throttle
+                </span>
+                <p className="text-lg text-white font-mono font-bold">
+                  {data.throttle}
+                  <span className="text-[10px] text-[#666]">%</span>
+                </p>
+              </div>
+              <div className="rounded-sm bg-[#141414] border border-[#262626] p-2">
+                <span className="text-[9px] text-[#666] font-mono tracking-[0.1em] uppercase">
+                  Brake
+                </span>
+                <p className="text-lg text-white font-mono font-bold">
+                  {data.brake}
+                  <span className="text-[10px] text-[#666]">%</span>
+                </p>
+              </div>
             </div>
           )}
         </motion.div>

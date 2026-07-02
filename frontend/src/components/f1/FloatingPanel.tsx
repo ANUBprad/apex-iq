@@ -1,65 +1,57 @@
-import { memo } from "react";
+import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 interface FloatingPanelProps {
-  title?: string;
-  children: React.ReactNode;
+  children: ReactNode;
+  className?: string;
   variant?:
     | "default"
-    | "compact"
-    | "glass"
-    | "glass-edge"
-    | "glow-red"
-    | "glow-blue"
-    | "bordered";
-  className?: string;
-  titleRight?: React.ReactNode;
-  id?: string;
+    | "accent"
+    | "success"
+    | "warning"
+    | "danger"
+    | "subtle"
+    | "strong";
+  accentColor?: string;
 }
 
-const variantStyles: Record<string, string> = {
-  default: "bg-[#141414] border-[#262626] p-4 hover:border-[#333]",
-  compact: "bg-[#141414] border-[#262626] p-3 hover:border-[#333]",
-  glass: "glass-panel p-4",
-  "glass-edge": "glass-panel glass-panel-edge p-4",
-  "glow-red":
-    "bg-[#141414] border-[#E10600]/30 glow-red hover:border-[#E10600]/50",
-  "glow-blue":
-    "bg-[#141414] border-[#00C8FF]/30 glow-blue hover:border-[#00C8FF]/50",
-  bordered: "bg-[#141414] border-[#E10600] hover:border-[#E10600]/80",
+const variants = {
+  default: "glass-panel border-[#222] bg-[#0D0D0D]/70",
+  accent: "glass-panel border-[#E10600]/20 bg-[#E10600]/5",
+  success: "glass-panel border-[#00FF85]/20 bg-[#00FF85]/5",
+  warning: "glass-panel border-[#FF8800]/20 bg-[#FF8800]/5",
+  danger: "glass-panel border-[#E10600]/30 bg-[#E10600]/10",
+  subtle: "bg-transparent border-[#1A1A1A]",
+  strong: "bg-[#111] border-[#222] shadow-lg",
 };
 
-export const FloatingPanel = memo(function FloatingPanel({
-  title,
+export function FloatingPanel({
   children,
-  variant = "default",
   className,
-  titleRight,
-  id,
+  variant = "default",
+  accentColor,
 }: FloatingPanelProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      style={{ willChange: "transform, opacity" }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
       className={cn(
-        "rounded-md border transition-all duration-250",
-        variantStyles[variant] || variantStyles.default,
+        "rounded-sm border p-5 transition-all duration-300",
+        variants[variant],
         className,
       )}
-      id={id}
+      style={
+        accentColor
+          ? ({
+              borderColor: `${accentColor}22`,
+              background: `${accentColor}08`,
+            } as React.CSSProperties)
+          : undefined
+      }
     >
-      {title && (
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-[11px] uppercase tracking-[0.12em] text-[#666666] font-medium">
-            {title}
-          </h3>
-          {titleRight}
-        </div>
-      )}
       {children}
     </motion.div>
   );
-});
+}

@@ -68,7 +68,7 @@ const DRIVER = "Max Verstappen";
 const TEAM = "Red Bull";
 
 function AnalyticsPage() {
-  const { data: circuits } = useCircuitsQuery();
+  const { data: circuits, isLoading: circuitsLoading } = useCircuitsQuery();
   const defaultCircuit = circuits?.[0]?.name ?? "Monaco";
   const [selectedCirc, setSelectedCirc] = useState(defaultCircuit);
 
@@ -82,6 +82,12 @@ function AnalyticsPage() {
   const pitAccuracyQuery = usePitAccuracyQuery(selectedCirc, 18);
   const mcMutation = useMonteCarloMutation();
   const outcomeMutation = useRaceOutcomeMutation();
+
+  const isLoading =
+    circuitsLoading ||
+    driverQuery.isLoading ||
+    teamQuery.isLoading ||
+    histQuery.isLoading;
 
   useEffect(() => {
     mcMutation.mutate({
@@ -109,59 +115,69 @@ function AnalyticsPage() {
   const outcome = outcomeMutation.data;
   const comparison = comparisonQuery.data;
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-6 h-6 border-2 border-[#00D4FF] border-t-transparent rounded-full mx-auto"
+          />
+          <span className="text-[11px] text-[#555] font-mono">
+            Loading analytics...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen carbon-fiber">
-      <div className="absolute inset-0 ambient-glow-left pointer-events-none" />
+    <div className="min-h-screen bg-[#050505]">
       <motion.div
         variants={container}
         initial="hidden"
         animate="show"
         className="relative z-[1] p-5 space-y-4"
       >
+        {/* Hero — Analytics Overview */}
         <motion.div
           variants={fadeUp}
-          className="flex items-center justify-between"
+          className="mb-3 rounded-sm border border-[#00D4FF]/20 bg-gradient-to-r from-[#00D4FF]/5 via-transparent to-[#00D4FF]/5 p-4"
         >
-          <div>
-            <h1 className="text-lg font-bold text-white font-[family-name:var(--font-heading)] tracking-tight">
-              Analytics
-            </h1>
-            <p className="text-[10px] text-[#666] mt-0.5">
-              Driver & Team Performance Analysis ·{" "}
-              <span className="text-[#A0A0A0] font-mono tabular-nums">
-                {driver?.name ?? "—"}
-              </span>
-              {" / "}
-              <span className="text-[#A0A0A0] font-mono tabular-nums">
-                {team?.name ?? "—"}
-              </span>
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <motion.span
-                animate={{ opacity: [1, 0.3, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="w-1.5 h-1.5 rounded-full bg-[#00FF85]"
-              />
-              <span className="text-[9px] text-[#00FF85] font-mono tracking-[0.1em]">
-                DATA STREAM
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-[2px] h-8 rounded-full bg-[#00D4FF]" />
+                <div>
+                  <h1 className="text-xl font-bold text-white font-[family-name:var(--font-heading)] tracking-tight">
+                    Analytics
+                  </h1>
+                  <p className="text-[10px] text-[#555] mt-0.5">
+                    Driver performance · Team DNA · Historical intelligence
+                  </p>
+                </div>
+              </div>
+              <span className="text-[10px] text-[#666] font-mono">
+                {driver?.name ?? "—"} / {team?.name ?? "—"}
               </span>
             </div>
-            <div className="flex gap-1">
-              {(circuits ?? []).slice(0, 6).map((c) => (
-                <button
-                  key={c.name}
-                  onClick={() => setSelectedCirc(c.name)}
-                  className={`text-[9px] px-2 py-1 rounded-sm font-mono ${
-                    selectedCirc === c.name
-                      ? "bg-[#E10600]/10 text-[#E10600] border border-[#E10600]/30"
-                      : "bg-[#101010] text-[#666] border border-[#262626] hover:text-[#A0A0A0]"
-                  }`}
-                >
-                  {c.name.slice(0, 4).toUpperCase()}
-                </button>
-              ))}
+            <div className="flex items-center gap-2">
+              <div className="flex gap-0.5 rounded-sm bg-[#111] border border-[#222] p-0.5">
+                {(circuits ?? []).slice(0, 5).map((c) => (
+                  <button
+                    key={c.name}
+                    onClick={() => setSelectedCirc(c.name)}
+                    className={`text-[10px] px-2 py-1 rounded-sm font-mono ${
+                      selectedCirc === c.name
+                        ? "bg-[#00D4FF]/10 text-[#00D4FF] border border-[#00D4FF]/30"
+                        : "bg-transparent text-[#666] hover:text-[#A0A0A0]"
+                    }`}
+                  >
+                    {c.name.slice(0, 4).toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </motion.div>

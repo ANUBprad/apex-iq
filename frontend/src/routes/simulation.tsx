@@ -8,11 +8,11 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import {
-  useSimulationMutation,
+  useSimulationQueryEnabled,
   useMonteCarloMutation,
   useRaceOutcomeMutation,
 } from "@/hooks/useApiQueries";
-import type { SimulationResponse } from "@/lib/api";
+import type { SimulationResponse, StrategyInput } from "@/lib/api";
 
 const container = {
   hidden: { opacity: 0 },
@@ -72,8 +72,19 @@ function SimulationPage() {
   const [activeTab, setActiveTab] = useState<
     "simulation" | "monte-carlo" | "outcome"
   >("simulation");
+  const [simParams, setSimParams] = useState<StrategyInput | null>(null);
 
-  const simulation = useSimulationMutation();
+  const simulation = useSimulationQueryEnabled(
+    simParams ?? {
+      compound: "Medium",
+      tyre_age: 8,
+      circuit: "Monza",
+      gap_ahead: 1.2,
+      gap_behind: 2.1,
+      laps_remaining: 53,
+    },
+    !!simParams,
+  );
   const monteCarlo = useMonteCarloMutation();
   const outcome = useRaceOutcomeMutation();
 
@@ -81,17 +92,18 @@ function SimulationPage() {
   const mcData = monteCarlo.data;
   const outcomeData = outcome.data;
   const isPending =
-    simulation.isPending || monteCarlo.isPending || outcome.isPending;
+    simulation.isFetching || monteCarlo.isPending || outcome.isPending;
 
   const runAll = () => {
-    simulation.mutateAsync({
+    const input: StrategyInput = {
       compound: "Medium",
       tyre_age: 8,
-      laps_remaining: 53,
+      circuit: "Monza",
       gap_ahead: 1.2,
       gap_behind: 2.1,
-      base_position: 1,
-    });
+      laps_remaining: 53,
+    };
+    setSimParams(input);
     monteCarlo.mutateAsync({ ...params });
     outcome.mutateAsync({ ...params });
   };
@@ -103,65 +115,77 @@ function SimulationPage() {
   ];
 
   return (
-    <div className="min-h-screen carbon-fiber">
-      <div className="absolute inset-0 ambient-glow-left pointer-events-none" />
+    <div className="min-h-screen bg-[#050505]">
       <motion.div
         variants={container}
         initial="hidden"
         animate="show"
         className="relative z-[1] p-5 space-y-4"
       >
+        {/* Hero — Scenario Explorer */}
         <motion.div
           variants={fadeUp}
-          className="flex items-center justify-between"
+          className="mb-3 rounded-sm border border-[#A855F7]/20 bg-gradient-to-r from-[#A855F7]/5 via-transparent to-[#A855F7]/5 p-4"
         >
-          <div>
-            <h1 className="text-lg font-bold text-white font-[family-name:var(--font-heading)] tracking-tight">
-              Simulation Engine
-            </h1>
-            <div className="flex items-center gap-3 mt-1">
-              <span className="text-[10px] text-[#666] font-mono tracking-[0.08em]">
-                MONTE CARLO · PIT STRATEGY · OUTCOME PREDICTION
-              </span>
-              <div className="flex items-center gap-1.5">
-                <motion.span
-                  animate={{ opacity: [1, 0.3, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="w-1.5 h-1.5 rounded-full bg-[#00C8FF]"
-                />
-                <span className="text-[9px] text-[#00C8FF] font-mono tracking-[0.1em]">
-                  DATA STREAM
-                </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-[2px] h-8 rounded-full bg-[#A855F7]" />
+                <div>
+                  <h1 className="text-xl font-bold text-white font-[family-name:var(--font-heading)] tracking-tight">
+                    Simulation
+                  </h1>
+                  <p className="text-[10px] text-[#555] mt-0.5">
+                    Pit strategy · Monte Carlo · Race outcome prediction
+                  </p>
+                </div>
               </div>
             </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={runAll}
+              disabled={isPending}
+              className="h-8 px-4 bg-[#A855F7] text-white text-[10px] font-mono font-medium rounded-sm hover:bg-[#A855F7]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {isPending ? (
+                <>
+                  <motion.span
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"
+                  />
+                  <span>RUNNING...</span>
+                </>
+              ) : (
+                <>
+                  <span>▶</span>
+                  <span>RUN ALL</span>
+                </>
+              )}
+            </motion.button>
           </div>
-          <motion.button
-            variants={fadeUp}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={runAll}
-            disabled={isPending}
-            className="bg-[#E10600] text-white text-sm font-medium px-4 py-2 rounded-sm hover:bg-[#E10600]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {isPending ? (
-              <>
-                <motion.span
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"
-                />
-                <span className="text-[10px] font-mono">RUNNING...</span>
-              </>
-            ) : (
-              <>
-                <span className="text-[10px] font-mono">▶</span>
-                <span className="text-[10px] font-mono">RUN ALL</span>
-              </>
+          <div className="mt-3 grid grid-cols-4 gap-2">
+            {["Weather", "Safety Car", "Virtual Safety Car", "Red Flag"].map(
+              (scenario) => (
+                <div
+                  key={scenario}
+                  className="rounded-sm bg-[#141414] border border-[#262626] p-2 text-center"
+                >
+                  <span className="text-[10px] text-[#A855F7] font-mono tracking-wide uppercase">
+                    {scenario}
+                  </span>
+                </div>
+              ),
             )}
-          </motion.button>
+          </div>
         </motion.div>
 
-        <motion.div variants={fadeUp} className="flex items-center gap-1.5">
+        <motion.div variants={fadeUp} className="flex items-center gap-1">
           {tabs.map((tab) => (
             <motion.button
               key={tab.id}
@@ -171,7 +195,7 @@ function SimulationPage() {
               className={`text-[10px] px-3 py-1.5 rounded-sm font-medium uppercase tracking-[0.1em] transition-all duration-200 ${
                 activeTab === tab.id
                   ? "bg-[#E10600] text-white shadow-lg shadow-[#E10600]/20"
-                  : "bg-[#101010] text-[#666] border border-[#262626] hover:text-[#A0A0A0] hover:border-[#333]"
+                  : "bg-[#111] text-[#666] border border-[#222] hover:text-[#A0A0A0] hover:border-[#444]"
               }`}
             >
               {tab.label}
@@ -251,7 +275,7 @@ function SimulationPage() {
                         </div>
                       ) : (
                         <div className="text-[10px] text-[#666] py-8 text-center font-mono">
-                          {simulation.isPending
+                          {simulation.isFetching
                             ? "Computing pit simulation..."
                             : 'Press "Run All" to simulate'}
                         </div>

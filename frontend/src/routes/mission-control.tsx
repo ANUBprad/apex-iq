@@ -62,89 +62,94 @@ function MissionControlPage() {
         animate="show"
         className="mx-auto max-w-[1920px] px-3 py-3 md:px-6 md:py-4"
       >
-        {/* Top Bar — Race Clock & Status */}
+        {/* Hero — KPI Strip */}
         <motion.div
           variants={item}
-          className="mb-3 flex flex-wrap items-center justify-between gap-3"
+          className="mb-4 rounded-sm border border-[#E10600]/20 bg-gradient-to-r from-[#E10600]/5 via-transparent to-[#E10600]/5 p-4"
         >
-          <div className="flex items-center gap-4">
-            <h1 className="font-[family-name:var(--font-heading)] text-xl font-bold tracking-tight text-white md:text-2xl">
-              MISSION CONTROL
-            </h1>
-            <StatusDot color="green" label="LIVE" animate />
-            <span className="font-mono text-xs text-[#666]">
-              {data.race_state.status} · Lap {data.race_state.lap}/
-              {data.race_state.total_laps}
-            </span>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-8 rounded-full bg-[#E10600]" />
+                <div>
+                  <h1 className="font-[family-name:var(--font-heading)] text-xl font-bold tracking-tight text-white md:text-2xl">
+                    MISSION CONTROL
+                  </h1>
+                  <p className="text-[9px] text-[#666] font-mono tracking-[0.15em] uppercase">
+                    Race Command Center
+                  </p>
+                </div>
+              </div>
+              <StatusDot color="green" label="LIVE" animate />
+              <span className="font-mono text-xs text-[#666]">
+                {data.race_state.status} · Lap {data.race_state.lap}/
+                {data.race_state.total_laps}
+              </span>
+            </div>
+            <div className="flex items-center gap-3 text-xs text-[#666]">
+              <span>{data.weather.condition}</span>
+              <span>{data.weather.air_temp}°C air</span>
+              <span>{data.weather.track_temp}°C track</span>
+              <span>{data.weather.wind_speed} km/h</span>
+              <button
+                onClick={handleExport}
+                className="h-8 px-3 text-[10px] bg-[#111] border border-[#222] text-[#888] hover:text-white hover:border-[#444] rounded-sm transition-all duration-200"
+                aria-label="Export Mission Control snapshot"
+              >
+                Export
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3 text-xs text-[#666]">
-            <span>{data.weather.condition}</span>
-            <span>{data.weather.air_temp}°C air</span>
-            <span>{data.weather.track_temp}°C track</span>
-            <span>{data.weather.wind_speed} km/h</span>
-            <button
-              onClick={handleExport}
-              className="ml-2 rounded-sm border border-[#262626] bg-[#101010] px-3 py-1.5 text-[10px] font-medium text-[#a0a0a0] hover:bg-[#141414] hover:text-white transition-colors"
-              aria-label="Export Mission Control snapshot"
-            >
-              EXPORT ↓
-            </button>
+          <div className="grid grid-cols-4 gap-3 lg:grid-cols-8">
+            <KpiCard
+              label="Race Score"
+              value={data.kpis.race_score}
+              max={100}
+              color="red"
+            />
+            <KpiCard
+              label="Strategy"
+              value={data.kpis.strategy_efficiency}
+              max={100}
+              color="blue"
+            />
+            <KpiCard
+              label="AI Confidence"
+              value={data.kpis.ai_confidence}
+              max={100}
+              color="green"
+            />
+            <KpiCard
+              label="Sim Agreement"
+              value={data.kpis.simulation_agreement}
+              max={100}
+              color="yellow"
+            />
+            <KpiCard
+              label="Tyre Health"
+              value={data.kpis.tyre_health}
+              max={100}
+              color="orange"
+            />
+            <KpiCard
+              label="Fuel (laps)"
+              value={data.kpis.fuel_target}
+              max={20}
+              color="white"
+            />
+            <KpiCard
+              label="Win Prob"
+              value={data.predictions.win_probability}
+              max={100}
+              color="red"
+            />
+            <KpiCard
+              label="Podium Prob"
+              value={data.predictions.podium_probability}
+              max={100}
+              color="green"
+            />
           </div>
-        </motion.div>
-
-        {/* Row 1 — KPI Cards */}
-        <motion.div
-          variants={item}
-          className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8"
-        >
-          <KpiCard
-            label="Race Score"
-            value={data.kpis.race_score}
-            max={100}
-            color="red"
-          />
-          <KpiCard
-            label="Strategy"
-            value={data.kpis.strategy_efficiency}
-            max={100}
-            color="blue"
-          />
-          <KpiCard
-            label="AI Confidence"
-            value={data.kpis.ai_confidence}
-            max={100}
-            color="green"
-          />
-          <KpiCard
-            label="Sim Agreement"
-            value={data.kpis.simulation_agreement}
-            max={100}
-            color="yellow"
-          />
-          <KpiCard
-            label="Tyre Health"
-            value={data.kpis.tyre_health}
-            max={100}
-            color="orange"
-          />
-          <KpiCard
-            label="Fuel (laps)"
-            value={data.kpis.fuel_target}
-            max={20}
-            color="white"
-          />
-          <KpiCard
-            label="Win Prob"
-            value={data.predictions.win_probability}
-            max={100}
-            color="red"
-          />
-          <KpiCard
-            label="Podium Prob"
-            value={data.predictions.podium_probability}
-            max={100}
-            color="green"
-          />
         </motion.div>
 
         {/* Row 2 — Main: Track Map + AI Rec + Predictions */}

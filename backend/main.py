@@ -54,6 +54,18 @@ APP_BUILD = "2025-Q2"
 
 app = FastAPI(title="F1 AI Race Engineer API", version=APP_VERSION)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080",
+    ).split(","),
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+    expose_headers=["X-Request-ID", "X-Response-Time"],
+)
+
 from backend.middleware import APITimingMiddleware
 app.add_middleware(APITimingMiddleware)
 
@@ -63,17 +75,6 @@ app.include_router(simulations_v2_router, prefix="/api/v2/simulations", tags=["S
 app.include_router(intelligence_v3_router)
 app.include_router(ai_engineer_router)
 app.include_router(mission_control_router)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=os.getenv(
-        "CORS_ORIGINS",
-        "http://localhost:3000,http://localhost:80,http://localhost:8080,http://127.0.0.1:3000",
-    ).split(","),
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-    expose_headers=["X-Request-ID", "X-Response-Time"],
-)
 
 
 @app.get("/")

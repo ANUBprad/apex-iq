@@ -382,7 +382,7 @@ function StrategyLabPage() {
   const isDisabled = simRunning;
 
   return (
-    <div className="min-h-screen carbon-fiber">
+    <div className="min-h-screen bg-[#050505]">
       <div className="absolute inset-0 ambient-glow-right pointer-events-none" />
       <motion.div
         variants={container}
@@ -390,69 +390,77 @@ function StrategyLabPage() {
         animate="show"
         className="relative z-[1] p-5 space-y-4"
       >
+        {/* Hero — Strategy Workspace */}
         <motion.div
           variants={fadeUp}
-          className="flex items-center justify-between"
+          className="mb-3 rounded-sm border border-[#FF8800]/20 bg-gradient-to-r from-[#FF8800]/5 via-transparent to-[#FF8800]/5 p-4"
         >
-          <div>
-            <h1 className="text-lg font-bold text-white font-[family-name:var(--font-heading)] tracking-tight">
-              Strategy Lab
-            </h1>
-            <p className="text-[10px] text-[#666] font-mono mt-1">
-              Interactive F1 race strategy engine — configurable simulation
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex gap-1 rounded-sm bg-[#141414] border border-[#262626] p-0.5">
-              {(["strategy", "tyre", "history"] as const).map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setView(v)}
-                  className={`px-3 py-1.5 text-[9px] font-mono uppercase tracking-[0.08em] rounded-sm transition-all ${
-                    view === v
-                      ? "bg-[#E10600] text-white shadow-lg shadow-[#E10600]/25"
-                      : "text-[#666] hover:text-white"
-                  }`}
-                >
-                  {v}
-                </button>
-              ))}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-[2px] h-8 rounded-full bg-[#FF8800]" />
+                <div>
+                  <h1 className="text-xl font-bold text-white font-[family-name:var(--font-heading)] tracking-tight">
+                    Strategy Lab
+                  </h1>
+                  <p className="text-[10px] text-[#555] mt-0.5">
+                    Tyre degradation · Pit windows · Monte Carlo analysis
+                  </p>
+                </div>
+              </div>
             </div>
-            <button
-              onClick={runSimulation}
-              disabled={simRunning}
-              className={`px-4 py-1.5 text-[9px] font-mono uppercase tracking-[0.08em] rounded-sm transition-all ${
-                simRunning
-                  ? "bg-[#262626] text-[#666] cursor-not-allowed"
-                  : "bg-[#E10600] text-white shadow-lg shadow-[#E10600]/25 hover:bg-[#cc0500]"
-              }`}
-            >
-              {simRunning ? (
-                <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                  Simulating
-                </span>
-              ) : (
-                "Run Simulation"
-              )}
-            </button>
-            {strategyData && (
+            <div className="flex items-center gap-2">
+              <div className="flex gap-0.5 rounded-sm bg-[#111] border border-[#222] p-0.5">
+                {(["strategy", "tyre", "history"] as const).map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setView(v)}
+                    className={`px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.08em] rounded-sm transition-all ${
+                      view === v
+                        ? "bg-[#FF8800] text-white shadow-lg shadow-[#FF8800]/25"
+                        : "text-[#666] hover:text-white"
+                    }`}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
               <button
-                onClick={() =>
-                  exportJSON(
-                    {
-                      strategy: strategyData,
-                      timestamp: new Date().toISOString(),
-                    },
-                    `apexiq-strategy-${strategyData.circuit_id}-${Date.now()}`,
-                  )
-                }
-                className="px-3 py-1.5 text-[9px] font-mono uppercase tracking-[0.08em] rounded-sm border border-[#262626] bg-[#101010] text-[#a0a0a0] hover:bg-[#141414] hover:text-white transition-all"
-                aria-label="Export strategy report"
+                onClick={runSimulation}
+                disabled={simRunning}
+                className={`h-8 px-3 text-[10px] font-mono uppercase tracking-[0.08em] rounded-sm transition-all ${
+                  simRunning
+                    ? "bg-[#222] text-[#666] cursor-not-allowed"
+                    : "bg-[#FF8800] text-white shadow-lg shadow-[#FF8800]/25 hover:bg-[#cc6600]"
+                }`}
               >
-                EXPORT ↓
+                {simRunning ? (
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    Simulating
+                  </span>
+                ) : (
+                  "Run Simulation"
+                )}
               </button>
-            )}
+              {strategyData && (
+                <button
+                  onClick={() =>
+                    exportJSON(
+                      {
+                        strategy: strategyData,
+                        timestamp: new Date().toISOString(),
+                      },
+                      `apexiq-strategy-${strategyData.circuit_id}-${Date.now()}`,
+                    )
+                  }
+                  className="h-8 px-3 text-[10px] font-mono uppercase tracking-[0.08em] rounded-sm border border-[#222] bg-[#111] text-[#888] hover:text-white hover:border-[#444] transition-all"
+                  aria-label="Export strategy report"
+                >
+                  Export
+                </button>
+              )}
+            </div>
           </div>
         </motion.div>
 

@@ -15,8 +15,6 @@ import { Route as SimulationRouteImport } from './routes/simulation'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RaceCenterRouteImport } from './routes/race-center'
 import { Route as MissionControlRouteImport } from './routes/mission-control'
-import { Route as MemoryRouteImport } from './routes/memory'
-import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AiEngineerRouteImport } from './routes/ai-engineer'
 import { Route as AboutRouteImport } from './routes/about'
@@ -52,16 +50,6 @@ const MissionControlRoute = MissionControlRouteImport.update({
   path: '/mission-control',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MemoryRoute = MemoryRouteImport.update({
-  id: '/memory',
-  path: '/memory',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const KnowledgeRoute = KnowledgeRouteImport.update({
-  id: '/knowledge',
-  path: '/knowledge',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -88,8 +76,6 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/ai-engineer': typeof AiEngineerRoute
   '/analytics': typeof AnalyticsRoute
-  '/knowledge': typeof KnowledgeRoute
-  '/memory': typeof MemoryRoute
   '/mission-control': typeof MissionControlRoute
   '/race-center': typeof RaceCenterRoute
   '/settings': typeof SettingsRoute
@@ -102,8 +88,6 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/ai-engineer': typeof AiEngineerRoute
   '/analytics': typeof AnalyticsRoute
-  '/knowledge': typeof KnowledgeRoute
-  '/memory': typeof MemoryRoute
   '/mission-control': typeof MissionControlRoute
   '/race-center': typeof RaceCenterRoute
   '/settings': typeof SettingsRoute
@@ -117,8 +101,6 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/ai-engineer': typeof AiEngineerRoute
   '/analytics': typeof AnalyticsRoute
-  '/knowledge': typeof KnowledgeRoute
-  '/memory': typeof MemoryRoute
   '/mission-control': typeof MissionControlRoute
   '/race-center': typeof RaceCenterRoute
   '/settings': typeof SettingsRoute
@@ -133,8 +115,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/ai-engineer'
     | '/analytics'
-    | '/knowledge'
-    | '/memory'
     | '/mission-control'
     | '/race-center'
     | '/settings'
@@ -147,8 +127,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/ai-engineer'
     | '/analytics'
-    | '/knowledge'
-    | '/memory'
     | '/mission-control'
     | '/race-center'
     | '/settings'
@@ -161,8 +139,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/ai-engineer'
     | '/analytics'
-    | '/knowledge'
-    | '/memory'
     | '/mission-control'
     | '/race-center'
     | '/settings'
@@ -176,8 +152,6 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AiEngineerRoute: typeof AiEngineerRoute
   AnalyticsRoute: typeof AnalyticsRoute
-  KnowledgeRoute: typeof KnowledgeRoute
-  MemoryRoute: typeof MemoryRoute
   MissionControlRoute: typeof MissionControlRoute
   RaceCenterRoute: typeof RaceCenterRoute
   SettingsRoute: typeof SettingsRoute
@@ -230,20 +204,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionControlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/memory': {
-      id: '/memory'
-      path: '/memory'
-      fullPath: '/memory'
-      preLoaderRoute: typeof MemoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/knowledge': {
-      id: '/knowledge'
-      path: '/knowledge'
-      fullPath: '/knowledge'
-      preLoaderRoute: typeof KnowledgeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/analytics': {
       id: '/analytics'
       path: '/analytics'
@@ -280,8 +240,6 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AiEngineerRoute: AiEngineerRoute,
   AnalyticsRoute: AnalyticsRoute,
-  KnowledgeRoute: KnowledgeRoute,
-  MemoryRoute: MemoryRoute,
   MissionControlRoute: MissionControlRoute,
   RaceCenterRoute: RaceCenterRoute,
   SettingsRoute: SettingsRoute,

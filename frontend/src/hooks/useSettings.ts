@@ -5,6 +5,7 @@ export interface AppSettings {
   telemetryRefreshMs: number;
   animationsEnabled: boolean;
   compactMode: boolean;
+  liveUpdates: boolean;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -12,6 +13,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   telemetryRefreshMs: 2000,
   animationsEnabled: true,
   compactMode: false,
+  liveUpdates: true,
 };
 
 const STORAGE_KEY = "apexiq-settings";

@@ -238,25 +238,31 @@ function RaceCenterPage() {
         animate="show"
         className="relative z-[1] p-5 space-y-4"
       >
+        {/* Hero — Live Timing Header */}
         <motion.div
           variants={item}
-          className="flex items-center justify-between"
+          className="mb-3 rounded-sm border border-[#00FF85]/20 bg-gradient-to-r from-[#00FF85]/5 via-transparent to-[#00FF85]/5 p-4"
         >
-          <div>
-            <h1 className="text-lg font-bold text-white font-[family-name:var(--font-heading)] tracking-tight">
-              Race Center
-            </h1>
-            <div className="flex items-center gap-3 mt-1">
-              <span className="text-[10px] text-[#666] font-mono tracking-[0.08em]">
-                {circuit.name.toUpperCase()} · GRAND PRIX
-              </span>
-              <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-[2px] h-8 rounded-full bg-[#00FF85]" />
+                <div>
+                  <h1 className="text-xl font-bold text-white font-[family-name:var(--font-heading)] tracking-tight">
+                    Race Center
+                  </h1>
+                  <p className="text-[10px] text-[#555] mt-0.5">
+                    Live timing · {circuit.name} Grand Prix
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-[#00FF85]/10 border border-[#00FF85]/30 rounded-sm">
                 <motion.span
                   animate={{ opacity: [1, 0.3, 1] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                   className="w-1.5 h-1.5 rounded-full bg-[#00FF85]"
                 />
-                <span className="text-[9px] text-[#00FF85] font-mono tracking-[0.1em]">
+                <span className="text-[10px] text-[#00FF85] font-mono font-medium tracking-wider">
                   LIVE
                 </span>
               </div>
@@ -264,23 +270,49 @@ function RaceCenterPage() {
                 {elapsed}
               </span>
             </div>
+            <div className="flex items-center gap-1">
+              {(["telemetry", "strategy", "prediction"] as const).map(
+                (view) => (
+                  <motion.button
+                    key={view}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setSelectedView(view)}
+                    className={`text-[10px] px-3 py-1.5 rounded-sm font-medium uppercase tracking-[0.1em] transition-all duration-200 ${
+                      selectedView === view
+                        ? "bg-[#00FF85] text-black shadow-lg shadow-[#00FF85]/20"
+                        : "bg-[#111] text-[#666] border border-[#222] hover:text-[#A0A0A0] hover:border-[#444]"
+                    }`}
+                  >
+                    {view}
+                  </motion.button>
+                ),
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            {(["telemetry", "strategy", "prediction"] as const).map((view) => (
-              <motion.button
-                key={view}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => setSelectedView(view)}
-                className={`text-[10px] px-3 py-1.5 rounded-sm font-medium uppercase tracking-[0.1em] transition-all duration-200 ${
-                  selectedView === view
-                    ? "bg-[#E10600] text-white shadow-lg shadow-[#E10600]/20"
-                    : "bg-[#101010] text-[#666] border border-[#262626] hover:text-[#A0A0A0] hover:border-[#333]"
-                }`}
-              >
-                {view}
-              </motion.button>
-            ))}
+          <div className="mt-3 grid grid-cols-3 gap-3 text-center">
+            <div className="rounded-sm bg-[#141414] border border-[#262626] p-2">
+              <span className="text-[9px] text-[#666] font-mono tracking-[0.1em] uppercase">
+                Circuit
+              </span>
+              <p className="text-xs text-white font-mono mt-0.5">
+                {circuit.name}
+              </p>
+            </div>
+            <div className="rounded-sm bg-[#141414] border border-[#262626] p-2">
+              <span className="text-[9px] text-[#666] font-mono tracking-[0.1em] uppercase">
+                Lap
+              </span>
+              <p className="text-xs text-white font-mono mt-0.5">
+                {raceOrderQuery.data?.drivers?.[0]?.lap ?? "—"}
+              </p>
+            </div>
+            <div className="rounded-sm bg-[#141414] border border-[#262626] p-2">
+              <span className="text-[9px] text-[#666] font-mono tracking-[0.1em] uppercase">
+                Session
+              </span>
+              <p className="text-xs text-white font-mono mt-0.5">RACE</p>
+            </div>
           </div>
         </motion.div>
 
