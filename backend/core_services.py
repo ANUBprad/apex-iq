@@ -1,12 +1,45 @@
-from backend.ml.strategy_engine import StrategyEngine
-from backend.agents.race_engineer import RaceEngineer
-from backend.simulation.strategy_simulator import StrategySimulator
+import threading
 
-engine = StrategyEngine()
-race_engineer = RaceEngineer()
-simulator = StrategySimulator(engine)
+_engine = None
+_race_engineer = None
+_simulator = None
+_lock = threading.Lock()
+
+
+def _get_engine():
+    global _engine
+    if _engine is None:
+        with _lock:
+            if _engine is None:
+                from backend.ml.strategy_engine import StrategyEngine
+                _engine = StrategyEngine()
+    return _engine
+
+
+def _get_race_engineer():
+    global _race_engineer
+    if _race_engineer is None:
+        with _lock:
+            if _race_engineer is None:
+                from backend.agents.race_engineer import RaceEngineer
+                _race_engineer = RaceEngineer()
+    return _race_engineer
+
+
+def _get_simulator():
+    global _simulator
+    if _simulator is None:
+        with _lock:
+            if _simulator is None:
+                from backend.simulation.strategy_simulator import StrategySimulator
+                _simulator = StrategySimulator(_get_engine())
+    return _simulator
+
 
 def run_strategy(data):
+    engine = _get_engine()
+    race_engineer = _get_race_engineer()
+
     result = engine.decide(
         compound=data.compound,
         tyre_age=data.tyre_age,
@@ -48,12 +81,15 @@ def run_strategy(data):
         "pit_window_analysis": result["pit_window_analysis"]
     }
 
+
 def run_simulation(data):
+    engine = _get_engine()
+
     sim = engine.simulate_strategy_options(
         compound=data.compound,
         tyre_age=data.tyre_age,
         circuit=data.circuit,
-        gap_ahead=data.gap_ahead,   
+        gap_ahead=data.gap_ahead,
     )
 
     return {
@@ -63,7 +99,12 @@ def run_simulation(data):
         "undercut_possible": bool(float(sim["undercut_gain"]) > data.gap_ahead),
     }
 
+
 def run_strategy_comparison(data):
+    engine = _get_engine()
+    simulator = _get_simulator()
+    race_engineer = _get_race_engineer()
+
     traffic_info = engine.predict_traffic(data.gap_ahead, data.gap_behind, engine.get_pit_loss(data.circuit))
     fuel_needed = (data.fuel_burn_rate * data.laps_remaining)
     fuel_delta = (data.fuel_load - fuel_needed)
@@ -77,7 +118,7 @@ def run_strategy_comparison(data):
         traffic_status=traffic_info["traffic_status"],
         fuel_delta=fuel_delta
     )
-    
+
     result["analysis"] = (race_engineer.explain_strategy_ranking(result))
 
     return result

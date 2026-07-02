@@ -124,9 +124,9 @@ def ai_engineer_chat(req: ChatRequest, http_request: Request):
     telemetry = generate_telemetry_snapshot()
     driver_data = get_driver(driver_name)
     team_data = get_team(team_name)
-    circuits = load_circuits()
+    circuits_list = load_circuits()
     compounds = load_compounds()
-    circuit_data = circuits.get(circuit, {})
+    circuit_data = next((c for c in circuits_list if c.get("name") == circuit), {})
     historical = get_races_by_circuit(circuit)
     learning_cases = analyze_similar_cases(circuit, "MEDIUM")
 
@@ -198,14 +198,22 @@ def ai_engineer_chat(req: ChatRequest, http_request: Request):
     rec_strategy = rec_data.get("strategy", {})
     rec_text = (
         rec_strategy.get("strategy", "")
-        or rec_data.get("recommendation", "")
-        or "Analysis complete. Review the detailed breakdown in the panels."
-    )
+        if isinstance(rec_strategy.get("strategy"), str)
+        else ""
+    ) or (
+        rec_data.get("recommendation", "")
+        if isinstance(rec_data.get("recommendation"), str)
+        else ""
+    ) or "Analysis complete. Review the detailed breakdown in the panels."
     reasoning_text = (
         rec_strategy.get("reasoning", "")
-        or rec_data.get("reasoning", "")
-        or "Multi-agent intelligence pipeline analysis complete."
-    )
+        if isinstance(rec_strategy.get("reasoning"), str)
+        else ""
+    ) or (
+        rec_data.get("reasoning", "")
+        if isinstance(rec_data.get("reasoning"), str)
+        else ""
+    ) or "Multi-agent intelligence pipeline analysis complete."
 
     # Build alternatives
     alternatives = []
@@ -344,8 +352,8 @@ def clear_session(session_id: str):
 
 @router.get("/context/{circuit}")
 def get_context(circuit: str):
-    circuits = load_circuits()
-    circuit_data = circuits.get(circuit, {})
+    circuits_list = load_circuits()
+    circuit_data = next((c for c in circuits_list if c.get("name") == circuit), {})
     historical = get_races_by_circuit(circuit)
     return {
         "circuit": circuit,

@@ -146,7 +146,7 @@ export interface StrategyResponse {
   traffic_risk: string;
   optimal_pit_lap: number;
   pit_window_score: number;
-  pit_window_analysis: string;
+  pit_window_analysis: { lap: number; score: number }[];
 }
 
 export interface SimulationResponse {
@@ -211,8 +211,10 @@ export interface DriverProfileResponse {
   team: string | null;
   aggression: number;
   tyre_management: number;
-  overtaking: number;
-  wet_weather: number;
+  overtake_efficiency: number;
+  wet_weather_skill: number;
+  consistency: number;
+  racecraft: number;
 }
 
 export interface TeamResponse {
@@ -275,11 +277,12 @@ export interface V3MetricsResponse {
 
 export interface V3MemoryEntry {
   id: string;
-  query: string;
   circuit: string;
-  recommendation: Record<string, unknown>;
-  confidence: number;
   timestamp: string;
+  strategy_name: string;
+  recommendation: Record<string, unknown>;
+  confidence: Record<string, unknown>;
+  outcome: unknown;
 }
 
 export interface V3CircuitMemoryResponse {
@@ -319,9 +322,14 @@ export async function getDashboardAggregate(params: {
   return fetchApi(`/api/v2/dashboard/session-summary?${qs}`);
 }
 
+export interface SimulationRunResponse {
+  job_id: string;
+  status: string;
+}
+
 export async function runSimulationJob(
   params: SimulationRunRequest,
-): Promise<SimulationJobResponse> {
+): Promise<SimulationRunResponse> {
   return fetchApi("/api/v2/simulations/run", {
     method: "POST",
     body: JSON.stringify(params),

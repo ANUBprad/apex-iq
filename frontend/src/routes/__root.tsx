@@ -123,42 +123,31 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   },
 );
 
-function BootScreen() {
+function BootScreen({ animate = false }: { animate?: boolean }) {
   return (
     <motion.div
       key="boot"
-      initial={{ opacity: 1 }}
+      initial={animate ? { opacity: 1 } : false}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
       className="fixed inset-0 z-[100] bg-[#050505] flex items-center justify-center"
     >
       <div className="text-center">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-12 h-12 bg-[#E10600] rounded-sm mx-auto mb-4 flex items-center justify-center glow-red"
-        >
+        <div className="w-12 h-12 bg-[#E10600] rounded-sm mx-auto mb-4 flex items-center justify-center glow-red">
           <span className="text-white font-bold text-xl font-[family-name:var(--font-heading)]">
             AQ
           </span>
-        </motion.div>
+        </div>
         <div className="flex items-center justify-center gap-2 mb-2">
-          <motion.span
-            animate={{ opacity: [1, 0.3, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="w-1.5 h-1.5 rounded-full bg-[#E10600]"
-          />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E10600]" />
           <p className="text-[11px] text-[#666] tracking-[0.15em] uppercase font-medium">
             Initializing Race Systems
           </p>
         </div>
         <div className="w-32 h-0.5 bg-[#262626] rounded-full mx-auto overflow-hidden">
-          <motion.div
+          <div
             className="h-full bg-[#E10600] rounded-full"
-            initial={{ width: "0%" }}
-            animate={{ width: "100%" }}
-            transition={{ duration: 1.0, ease: "easeInOut" }}
+            style={{ width: animate ? "100%" : "0%" }}
           />
         </div>
       </div>
@@ -169,8 +158,10 @@ function BootScreen() {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const [booting, setBooting] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const t = setTimeout(() => setBooting(false), 1200);
     return () => clearTimeout(t);
   }, []);
@@ -184,7 +175,9 @@ function RootComponent() {
         <QueryClientProvider client={queryClient}>
           <OfflineBanner />
           <SearchModal />
-          <AnimatePresence>{booting && <BootScreen />}</AnimatePresence>
+          <AnimatePresence>
+            {booting && <BootScreen animate={mounted} />}
+          </AnimatePresence>
           <ErrorBoundary>
             <AppShell />
           </ErrorBoundary>

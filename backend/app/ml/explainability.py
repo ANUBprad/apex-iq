@@ -1,8 +1,6 @@
 from typing import List, Dict, Any
 import os
 import json
-import numpy as np
-import pandas as pd
 from backend.app.ml.schemas import FeatureVector
 from backend.app.ml.features import FeatureGenerator
 
@@ -20,6 +18,7 @@ class PredictionExplanationService:
         dataset_path = "backend/app/ml/training_dataset.parquet"
         if os.path.exists(dataset_path):
             try:
+                import pandas as pd
                 df = pd.read_parquet(dataset_path)
                 feature_names = FeatureGenerator.get_feature_names()
                 # Exclude target columns if present
@@ -68,6 +67,7 @@ class PredictionExplanationService:
         j-th feature is replaced by its representative training baseline/median value.
         """
         try:
+            import pandas as pd
             model = self.prediction_service._load_model(target)
             feature_names = FeatureGenerator.get_feature_names()
             

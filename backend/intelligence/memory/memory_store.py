@@ -1,52 +1,34 @@
 """Persistent strategy memory using ChromaDB for storing past recommendations."""
 
 import json
-import os
 import uuid
 import threading
-import atexit
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta
-import chromadb
-from chromadb.config import Settings
-from backend.intelligence.rag.embedding_service import embed_batch
 from backend.intelligence.config import MEMORY_DIR, MEMORY_COLLECTION_NAME
+from backend.intelligence.rag.chroma_client import get_client
 
 COLLECTION_NAME = MEMORY_COLLECTION_NAME
 _MAX_MEMORY_ENTRIES = 10000
 _TTL_DAYS = 365
 
-_client = None
 _collection = None
-_lock = threading.RLock()
-
-
-def _get_lock():
-    return _lock
-
-
-def _get_client() -> chromadb.Client:
-    global _client
-    with _get_lock():
-        if _client is None:
-            os.makedirs(MEMORY_DIR, exist_ok=True)
-            _client = chromadb.PersistentClient(
-                path=MEMORY_DIR,
-                settings=Settings(anonymized_telemetry=False),
-            )
-    return _client
+_lock = threading.Lock()
 
 
 def _get_collection():
     global _collection
-    with _get_lock():
-        if _collection is None:
-            client = _get_client()
-            try:
-                _collection = client.get_collection(COLLECTION_NAME)
-            except (ValueError, Exception):
-                _collection = client.create_collection(COLLECTION_NAME)
-    return _collection
+    if _collection is not None:
+        return _collection
+    with _lock:
+        if _collection is not None:
+            return _collection
+        client = get_client(MEMORY_DIR)
+        try:
+            _collection = client.get_collection(COLLECTION_NAME)
+        except (ValueError, Exception):
+            _collection = client.create_collection(COLLECTION_NAME)
+        return _collection
 
 
 def _enforce_limits():
@@ -76,6 +58,7 @@ def store_recommendation(
     confidence: Dict[str, Any],
     outcome: Optional[Dict[str, Any]] = None,
 ) -> str:
+    from backend.intelligence.rag.embedding_service import embed_batch
     collection = _get_collection()
     doc_id = f"rec_{uuid.uuid4().hex}_{int(datetime.now().timestamp())}"
     strategy_field = recommendation.get("recommendation", {}).get("strategy", "")
@@ -135,13 +118,3 @@ def recall_similar(query: str, circuit: Optional[str] = None, n: int = 5) -> Lis
 def memory_count() -> int:
     collection = _get_collection()
     return collection.count()
-
-
-def close_client():
-    global _client, _collection
-    with _get_lock():
-        _client = None
-        _collection = None
-
-
-atexit.register(close_client)

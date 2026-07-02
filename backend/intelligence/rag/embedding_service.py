@@ -1,26 +1,21 @@
-"""Embedding service using sentence-transformers."""
+"""Embedding service — thin facade over the pluggable provider.
+
+All embedding calls are delegated to the active
+:class:`~backend.intelligence.rag.providers.base.EmbeddingProvider`
+selected by the ``EMBEDDING_PROVIDER`` environment variable.
+
+This module preserves the legacy ``embed_text`` / ``embed_batch`` API
+so that ``vector_store`` and ``memory_store`` require zero changes.
+"""
 
 from typing import List
 
-
-_MODEL = None
-
-
-def get_model():
-    global _MODEL
-    if _MODEL is None:
-        from sentence_transformers import SentenceTransformer
-        _MODEL = SentenceTransformer("all-MiniLM-L6-v2")
-    return _MODEL
+from backend.intelligence.rag.providers.provider_factory import get_provider
 
 
 def embed_text(text: str) -> List[float]:
-    return get_model().encode(text).tolist()
+    return get_provider().embed_text(text)
 
 
 def embed_batch(texts: List[str]) -> List[List[float]]:
-    return get_model().encode(texts).tolist()
-
-
-def warmup():
-    get_model()
+    return get_provider().embed_batch(texts)

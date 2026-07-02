@@ -1,12 +1,19 @@
 import os
 import json
+import logging
+import time
 
-import joblib
-import pandas as pd
+logger = logging.getLogger("apexiq.strategy_engine")
 
+# NOTE: tyre_model.pkl is an sklearn LinearRegression saved via joblib.
+#       It loads correctly with joblib.load().  An ndarray result when
+#       inspected with raw pickle is expected (joblib's internal format).
+#       Long-term: retrain the model with the current scikit-learn version
+#       to avoid any potential version-mismatch warnings.
 
 class StrategyEngine:
     def __init__(self):
+        _t0 = time.perf_counter()
         BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
         model_path = os.path.join(BASE_DIR, "ml", "models", "tyre_model.pkl")
@@ -18,10 +25,26 @@ class StrategyEngine:
         if not os.path.exists(circuits_path):
             raise FileNotFoundError(f"Circuits database not found at: {circuits_path}")
 
+        import joblib
         self.tyre_model = joblib.load(model_path)
+        _t_load = time.perf_counter()
+
+        model_type = type(self.tyre_model).__name__
+        if not hasattr(self.tyre_model, "predict"):
+            logger.warning(
+                "tyre_model.pkl loaded as %s (no predict method); "
+                "retrain with current sklearn to fix",
+                model_type,
+            )
 
         with open(circuits_path, "r") as f:
             self.circuit_data = json.load(f)
+
+        logger.info(
+            "StrategyEngine loaded in %.1f ms (joblib %.1f ms)",
+            (time.perf_counter() - _t0) * 1000,
+            (_t_load - _t0) * 1000,
+        )
 
     def get_circuit_data(self, circuit):
         return self.circuit_data.get(
@@ -101,6 +124,7 @@ class StrategyEngine:
         }
 
     def predict_degradation(self, compound, tyre_age, circuit="Bahrain", lap_number=10, track_temp=35, air_temp=25):
+        import pandas as pd
         compound_map = {"SOFT": 0, "MEDIUM": 1, "HARD": 2, "INTERMEDIATE": 3, "WET": 4}
         degradation_factor = self.get_degradation_factor(circuit)
 

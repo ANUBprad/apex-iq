@@ -23,9 +23,9 @@ def mission_control_snapshot():
     team_name = "Red Bull"
 
     telemetry = generate_telemetry_snapshot()
-    circuits = load_circuits()
+    circuits_list = load_circuits()
     compounds = load_compounds()
-    circuit_data = circuits.get(circuit, {})
+    circuit_data = next((c for c in circuits_list if c.get("name") == circuit), {})
     driver_data = get_driver(driver_name)
     team_data = get_team(team_name)
     historical = get_races_by_circuit(circuit)

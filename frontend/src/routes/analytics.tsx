@@ -209,13 +209,13 @@ function AnalyticsPage() {
                     />
                     <TelemetryGauge
                       label="Overtaking"
-                      value={driver?.overtaking ?? 0}
+                      value={driver?.overtake_efficiency ?? 0}
                       max={100}
                       color="blue"
                     />
                     <TelemetryGauge
                       label="Wet Weather"
-                      value={driver?.wet_weather ?? 0}
+                      value={driver?.wet_weather_skill ?? 0}
                       max={100}
                       color="purple"
                     />
@@ -241,13 +241,13 @@ function AnalyticsPage() {
                   />
                   <MetricCard
                     label="Overtaking"
-                    value={driver?.overtaking ?? "—"}
+                    value={driver?.overtake_efficiency ?? "—"}
                     unit="%"
                     color="blue"
                   />
                   <MetricCard
                     label="Wet Weather"
-                    value={driver?.wet_weather ?? "—"}
+                    value={driver?.wet_weather_skill ?? "—"}
                     unit="%"
                     color="purple"
                   />

@@ -13,6 +13,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger("apexiq")
 
+import importlib.util as _iu
+if _iu.find_spec("tensorflow") is not None:
+    logger.warning(
+        "TensorFlow is installed but not used by APEXiq. "
+        "It is pulled in transitively by `transformers.activations_tf` "
+        "when `sentence_transformers` is imported.  "
+        "Uninstall it to save ~1.5 GB RAM and ~17 s import time:  "
+        "pip uninstall tensorflow tf-keras keras -y"
+    )
+
 from backend.schemas import StrategyInput
 
 from backend.core_services import (
@@ -48,11 +58,6 @@ from backend.middleware import APITimingMiddleware
 app.add_middleware(APITimingMiddleware)
 
 
-@app.on_event("startup")
-def startup_warmup():
-    import threading as _t
-    from backend.intelligence.rag.embedding_service import warmup as _w
-    _t.Thread(target=_w, daemon=True).start()
 app.include_router(dashboard_v2_router, prefix="/api/v2/dashboard", tags=["Dashboard V2"])
 app.include_router(simulations_v2_router, prefix="/api/v2/simulations", tags=["Simulations V2"])
 app.include_router(intelligence_v3_router)

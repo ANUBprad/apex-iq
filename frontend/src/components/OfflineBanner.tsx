@@ -2,10 +2,14 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function OfflineBanner() {
-  const [online, setOnline] = useState(navigator.onLine);
+  const [online, setOnline] = useState(true);
   const [showReconnected, setShowReconnected] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    setOnline(navigator.onLine);
+
     const handleOnline = () => {
       setOnline(true);
       setShowReconnected(true);
@@ -20,6 +24,8 @@ export function OfflineBanner() {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
+
+  if (!mounted) return null;
 
   return (
     <AnimatePresence>

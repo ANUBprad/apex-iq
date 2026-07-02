@@ -783,8 +783,47 @@ function StrategyLabPage() {
                           </div>
                         </div>
                         <div className="p-3 rounded-sm bg-[#141414]/60 border border-[#262626]">
-                          <p className="text-[10px] text-[#A0A0A0] leading-relaxed">
-                            {strategyData.pit_window_analysis}
+                          <span className="text-[9px] text-[#666] font-mono tracking-[0.08em] uppercase block mb-2">
+                            Pit Window Analysis
+                          </span>
+                          <div className="flex items-end gap-0.5 h-12">
+                            {strategyData.pit_window_analysis.map((item) => {
+                              const maxScore = Math.max(
+                                ...strategyData.pit_window_analysis.map(
+                                  (x) => x.score,
+                                ),
+                              );
+                              const pct =
+                                maxScore > 0
+                                  ? (1 - item.score / maxScore) * 100
+                                  : 50;
+                              return (
+                                <div
+                                  key={item.lap}
+                                  className="flex-1 flex flex-col items-center gap-0.5"
+                                >
+                                  <div
+                                    className="w-full rounded-t-sm min-h-[2px]"
+                                    style={{
+                                      height: `${Math.max(pct, 5)}%`,
+                                      backgroundColor:
+                                        item.lap ===
+                                        strategyData.optimal_pit_lap
+                                          ? "#00FF85"
+                                          : "#E10600",
+                                      opacity: 0.8,
+                                    }}
+                                  />
+                                  <span className="text-[6px] text-[#666] font-mono">
+                                    {item.lap}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <p className="text-[9px] text-[#666] font-mono mt-2">
+                            Optimal: Lap {strategyData.optimal_pit_lap} (score{" "}
+                            {strategyData.pit_window_score}/100)
                           </p>
                         </div>
                         {strategyData.engine_briefing && (

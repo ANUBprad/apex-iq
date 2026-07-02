@@ -1,5 +1,3 @@
-import pickle
-import pandas as pd
 import json
 import os
 from typing import Dict, Any, Optional
@@ -39,6 +37,7 @@ class PredictionService:
                 raise ModelUnavailableError(f"Model file {path} missing for {target}.")
                 
             try:
+                import pickle
                 with open(path, "rb") as f:
                     self._models[target] = pickle.load(f)
             except Exception as e:
@@ -72,6 +71,7 @@ class PredictionService:
         return self._predict(vector, "top5")
 
     def _predict(self, vector: FeatureVector, target: str) -> float:
+        import pandas as pd
         model = self._load_model(target)
         data = [FeatureGenerator.to_array(vector)]
         df = pd.DataFrame(data, columns=self.feature_names)

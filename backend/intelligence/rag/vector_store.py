@@ -1,52 +1,33 @@
 """ChromaDB vector store for persistent knowledge retrieval."""
 
-import atexit
+import threading
 from typing import List, Optional
-import chromadb
-from chromadb.config import Settings
-from backend.intelligence.rag.document_loader import KnowledgeDocument
-from backend.intelligence.rag.embedding_service import embed_batch
 from backend.intelligence.config import CHROMA_DIR, CHROMA_COLLECTION_NAME
+from backend.intelligence.rag.chroma_client import get_client
 
 COLLECTION_NAME = CHROMA_COLLECTION_NAME
 
-_client = None
 _collection = None
-_lock = None
-
-
-def _get_lock():
-    global _lock
-    if _lock is None:
-        import threading
-        _lock = threading.RLock()
-    return _lock
-
-
-def _get_client() -> chromadb.Client:
-    global _client
-    with _get_lock():
-        if _client is None:
-            _client = chromadb.PersistentClient(
-                path=CHROMA_DIR,
-                settings=Settings(anonymized_telemetry=False),
-            )
-    return _client
+_lock = threading.Lock()
 
 
 def _get_collection():
     global _collection
-    with _get_lock():
-        if _collection is None:
-            client = _get_client()
-            try:
-                _collection = client.get_collection(COLLECTION_NAME)
-            except (ValueError, Exception):
-                _collection = client.create_collection(COLLECTION_NAME)
-    return _collection
+    if _collection is not None:
+        return _collection
+    with _lock:
+        if _collection is not None:
+            return _collection
+        client = get_client(CHROMA_DIR)
+        try:
+            _collection = client.get_collection(COLLECTION_NAME)
+        except (ValueError, Exception):
+            _collection = client.create_collection(COLLECTION_NAME)
+        return _collection
 
 
-def index_documents(docs: List[KnowledgeDocument]) -> int:
+def index_documents(docs: List) -> int:
+    from backend.intelligence.rag.embedding_service import embed_batch
     collection = _get_collection()
     texts = [d.content for d in docs]
     ids = [d.id for d in docs]
@@ -92,24 +73,6 @@ def collection_size() -> int:
     return collection.count()
 
 
-def close_client():
-    global _client, _collection
-    with _get_lock():
-        _client = None
-        _collection = None
-
-
-atexit.register(close_client)
-
-
 def reset_collection():
     global _collection
     _collection = None
-    client = _get_client()
-    _client = None
-    _collection = None
-    try:
-        client.delete_collection(COLLECTION_NAME)
-    except Exception as e:
-        import logging
-        logging.getLogger(__name__).warning("Failed to delete collection: %s", e)

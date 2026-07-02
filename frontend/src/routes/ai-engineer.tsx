@@ -208,12 +208,16 @@ function SelectControl({
 function AIEngineerPage() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [sessionId] = useState(() => Math.random().toString(36).slice(2, 14));
+  const [sessionId, setSessionId] = useState("session-init");
   const [circuit, setCircuit] = useState("Monaco");
   const [driver, setDriver] = useState("Max Verstappen");
   const [team, setTeam] = useState("Red Bull");
   const [weather, setWeather] = useState("Dry");
   const totalLaps = 58;
+
+  useEffect(() => {
+    setSessionId(Math.random().toString(36).slice(2, 14));
+  }, []);
 
   const chatMutation = useAIEngineerChat();
   const metricsQuery = useV3MetricsQuery();
