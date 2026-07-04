@@ -66,7 +66,18 @@ class AIState:
             elapsed = None
             if self._started_at and self._ready_at:
                 elapsed = round(self._ready_at - self._started_at, 1)
+
+            if self._ready:
+                status = "ready"
+            elif self._loading:
+                status = "loading"
+            elif self._error:
+                status = "error"
+            else:
+                status = "not_initialized"
+
             return {
+                "status": status,
                 "ready": self._ready,
                 "loading": self._loading,
                 "indexed": self._indexed,

@@ -33,16 +33,12 @@ def ensure_indexed() -> bool:
         return True
     except Exception:
         logger.exception("Failed to index documents into ChromaDB")
-        try:
-            from backend.intelligence.ai_state import ai_state
-            ai_state.mark_indexed()
-        except Exception:
-            pass
         return False
 
 
 def retrieve_context(query: str, n_results: int = 5, circuit: Optional[str] = None) -> List[dict]:
-    ensure_indexed()
+    from backend.intelligence.startup import ensure_ai_initialized
+    ensure_ai_initialized()
     filter_metadata = {}
     if circuit:
         filter_metadata = {"circuit": circuit}

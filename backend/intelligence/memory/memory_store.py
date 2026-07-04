@@ -58,6 +58,8 @@ def store_recommendation(
     confidence: Dict[str, Any],
     outcome: Optional[Dict[str, Any]] = None,
 ) -> str:
+    from backend.intelligence.startup import ensure_ai_initialized
+    ensure_ai_initialized()
     from backend.intelligence.rag.embedding_service import embed_batch
     collection = _get_collection()
     doc_id = f"rec_{uuid.uuid4().hex}_{int(datetime.now().timestamp())}"

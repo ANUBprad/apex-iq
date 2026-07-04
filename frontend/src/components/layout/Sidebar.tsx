@@ -220,8 +220,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const { data: v3Health } = useV3HealthQuery();
 
   const apiOnline = statusData?.api === "online";
-  const aiReady = !!v3Health?.ready;
-  const aiLoading = !!v3Health?.loading;
+  const aiStatus = (v3Health?.status ?? "not_initialized") as
+    "ready" | "loading" | "error" | "not_initialized";
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -249,11 +249,14 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     },
     {
       label: "AI",
-      status: aiReady
-        ? ("online" as const)
-        : aiLoading
-          ? ("loading" as const)
-          : ("offline" as const),
+      status:
+        aiStatus === "ready"
+          ? ("online" as const)
+          : aiStatus === "loading"
+            ? ("loading" as const)
+            : aiStatus === "error"
+              ? ("error" as const)
+              : ("standby" as const),
     },
   ];
 
@@ -379,7 +382,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                     ? "bg-[#00FF85]"
                     : s.status === "loading"
                       ? "bg-[#FFD400]"
-                      : "bg-[#E10600]",
+                      : s.status === "error"
+                        ? "bg-[#E10600]"
+                        : "bg-[#555]",
                 )}
               />
               <span className="text-[10px] text-[#666] font-medium">
@@ -394,8 +399,10 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                   </span>
                 ) : s.status === "loading" ? (
                   <span className="text-[#FFD400]">Loading</span>
+                ) : s.status === "error" ? (
+                  <span className="text-[#E10600]">Error</span>
                 ) : (
-                  <span className="text-[#E10600]">Down</span>
+                  <span className="text-[#555]">Not Initialized</span>
                 )}
               </span>
             </div>

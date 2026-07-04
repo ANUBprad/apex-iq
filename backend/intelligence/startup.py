@@ -1,36 +1,42 @@
-"""Background AI initializer — runs once at server startup.
+"""Lazy AI initializer — runs once on first use, not at startup.
 
-Performs:
-  1. SentenceTransformer model load + warmup
-  2. ChromaDB collection init
-  3. Document indexing (embed + store)
-
-Updates ``ai_state`` throughout so the health endpoint can report
-progress without doing any work itself.
+Thread-safe: if N requests arrive simultaneously, only one performs
+initialization.  The others block until it completes.
 """
 
 import logging
+import threading
 import time
 
 logger = logging.getLogger("apexiq.startup")
 
+_init_lock = threading.Lock()
+_initialized = False
 
-def initialize_ai() -> None:
-    """Blocking call — run inside a background thread at startup."""
+
+def ensure_ai_initialized() -> None:
+    """Block until AI subsystem is ready.  No-op if already initialized."""
+    global _initialized
+    if _initialized:
+        return
+    with _init_lock:
+        if _initialized:
+            return
+        _do_initialize()
+        _initialized = True
+
+
+def _do_initialize() -> None:
+    """Perform the actual (slow) initialization."""
     from backend.intelligence.ai_state import ai_state
 
     ai_state.mark_loading()
     logger.info("AI initialization started")
 
     try:
-        # ── 1. Load SentenceTransformer ──────────────────────────────
         _t0 = time.perf_counter()
 
-        from backend.intelligence.rag.embedding_service import embed_text  # noqa: F401
-
-        # Force provider singleton + model load by embedding a warmup token.
-        # embed_text internally calls get_provider() → SentenceTransformerProvider
-        # → _ensure_loaded() which does the actual import + construct + encode.
+        from backend.intelligence.rag.embedding_service import embed_text
         embed_text("warmup")
 
         _t1 = time.perf_counter()
@@ -39,7 +45,6 @@ def initialize_ai() -> None:
             (_t1 - _t0) * 1000,
         )
 
-        # ── 2. Initialize ChromaDB collections ───────────────────────
         from backend.intelligence.rag.vector_store import (
             _get_collection as _get_rag_collection,
             collection_size,
@@ -57,9 +62,7 @@ def initialize_ai() -> None:
             (_t2 - _t1) * 1000,
         )
 
-        # ── 3. Index documents (ensure_indexed) ─────────────────────
         from backend.intelligence.rag.retriever import ensure_indexed
-
         ensure_indexed()
         _t3 = time.perf_counter()
         logger.info(
@@ -69,7 +72,6 @@ def initialize_ai() -> None:
             (_t3 - _t2) * 1000,
         )
 
-        # ── Done ─────────────────────────────────────────────────────
         ai_state.mark_ready(indexed=True)
         logger.info(
             "AI Ready (%.1f ms total)",
