@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect, memo } from "react";
 import { motion } from "framer-motion";
 
-const VIDEO_SRC = "/videos/intro.mp4";
+const VIDEO_SRC =
+  "https://res.cloudinary.com/dcqpnxpof/video/upload/v1783106159/intro_oyda63.mp4";
 
 interface HeroVideoProps {
   onReady: () => void;
@@ -41,6 +42,7 @@ export const HeroVideo = memo(function HeroVideo({ onReady }: HeroVideoProps) {
 
     const handleError = () => {
       if (!cancelled) {
+        console.warn("[APEXiq] HeroVideo failed to load, showing fallback");
         setFailed(true);
         setLoaded(true);
         onReady();
