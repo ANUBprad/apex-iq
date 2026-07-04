@@ -260,14 +260,16 @@ def intelligence_health():
     from backend.intelligence.ai_state import ai_state
 
     state = ai_state.snapshot()
+    rag_count = collection_size()
+    mem_count = memory_count()
 
     return {
         "status": state["status"],
         "ready": state["ready"],
         "loading": state["loading"],
         "indexed": state["indexed"],
-        "rag_document_count": 0,
-        "memory_entry_count": 0,
+        "rag_document_count": rag_count,
+        "memory_entry_count": mem_count,
         "available_sources": ["historical_races", "circuits"],
         "error": state["error"],
     }
