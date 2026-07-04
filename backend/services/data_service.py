@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 
 def load_circuits():
     with open(DATA_DIR / "circuits.json", "r", encoding="utf-8") as f:

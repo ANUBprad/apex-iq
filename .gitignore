@@ -2,9 +2,12 @@ venv/
 data/cache/
 data/chroma_db/
 data/chroma_memory/
-*.pkl
 *.log
+*.pkl
 
+# Keep deployment models
+!ml/models/*.pkl
+!backend/models/*.pkl
 
 # Chroma vector databases
 data/chroma_db/
