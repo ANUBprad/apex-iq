@@ -257,11 +257,43 @@ def circuit_memory(circuit: str, auth: str = Depends(_require_auth), ip: str = D
 
 @router.get("/health")
 def intelligence_health():
+    from backend.intelligence.ai_state import ai_state
+
+    state = ai_state.snapshot()
+
+    # Compute status string from state
+    if state["ready"]:
+        status_label = "ready"
+    elif state["loading"]:
+        status_label = "loading"
+    elif state["error"]:
+        status_label = "error"
+    else:
+        status_label = "unknown"
+
+    # Read-only counts — no triggering of ensure_indexed()
+    rag_count = 0
+    mem_count = 0
+    try:
+        from backend.intelligence.rag.vector_store import collection_size
+        rag_count = collection_size()
+    except Exception:
+        pass
+    try:
+        from backend.intelligence.memory.memory_store import memory_count
+        mem_count = memory_count()
+    except Exception:
+        pass
+
     return {
-        "status": "healthy",
-        "rag_document_count": collection_size(),
-        "memory_entry_count": memory_count(),
-        "available_sources": get_available_sources(),
+        "status": status_label,
+        "ready": state["ready"],
+        "loading": state["loading"],
+        "indexed": state["indexed"],
+        "rag_document_count": rag_count,
+        "memory_entry_count": mem_count,
+        "available_sources": ["historical_races", "circuits"],
+        "error": state["error"],
     }
 
 

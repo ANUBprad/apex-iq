@@ -114,9 +114,13 @@ export interface V3QueryResponse {
 
 export interface V3HealthResponse {
   status: string;
+  ready: boolean;
+  loading: boolean;
+  indexed: boolean;
   rag_document_count: number;
   memory_entry_count: number;
   available_sources: string[];
+  error: string | null;
 }
 
 export interface StrategyInput {

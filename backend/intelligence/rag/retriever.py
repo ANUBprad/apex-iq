@@ -1,23 +1,44 @@
 """Retrieve relevant context from the vector store with optional filtering."""
 
+import logging
 from typing import List, Optional
 from backend.intelligence.rag.vector_store import query_similar, collection_size, index_documents
 from backend.intelligence.rag.document_loader import load_all_documents
 
+logger = logging.getLogger("apexiq.retriever")
 
 _INDEXED = False
 
 
-def ensure_indexed():
+def ensure_indexed() -> bool:
+    """Index documents into ChromaDB if the collection is empty.
+
+    Returns True if indexing succeeded or was already done, False on failure.
+    """
     global _INDEXED
-    if not _INDEXED and collection_size() == 0:
-        docs = load_all_documents()
-        if docs:
-            try:
-                index_documents(docs)
-                _INDEXED = True
-            except Exception:
-                return
+    if _INDEXED:
+        return True
+    if collection_size() > 0:
+        _INDEXED = True
+        return True
+
+    docs = load_all_documents()
+    if not docs:
+        logger.warning("No documents found to index")
+        return False
+
+    try:
+        index_documents(docs)
+        _INDEXED = True
+        return True
+    except Exception:
+        logger.exception("Failed to index documents into ChromaDB")
+        try:
+            from backend.intelligence.ai_state import ai_state
+            ai_state.mark_indexed()
+        except Exception:
+            pass
+        return False
 
 
 def retrieve_context(query: str, n_results: int = 5, circuit: Optional[str] = None) -> List[dict]:
@@ -29,5 +50,4 @@ def retrieve_context(query: str, n_results: int = 5, circuit: Optional[str] = No
 
 
 def get_available_sources() -> List[str]:
-    ensure_indexed()
     return ["historical_races", "circuits"]

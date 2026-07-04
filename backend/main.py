@@ -1,5 +1,7 @@
 import os
 import logging
+import asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -52,7 +54,22 @@ from backend.api.mission_control import router as mission_control_router
 APP_VERSION = "4.5.0"
 APP_BUILD = "2025-Q2"
 
-app = FastAPI(title="F1 AI Race Engineer API", version=APP_VERSION)
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    """Startup / shutdown lifecycle.
+
+    AI initialization runs in the background via ``asyncio.to_thread``
+    so the server starts accepting requests immediately.  The health
+    endpoint reports loading/ready state via ``ai_state``.
+    """
+    from backend.intelligence.startup import initialize_ai
+
+    asyncio.create_task(asyncio.to_thread(initialize_ai))
+    yield
+
+
+app = FastAPI(title="F1 AI Race Engineer API", version=APP_VERSION, lifespan=lifespan)
 
 origins = [
     origin.strip()
@@ -95,7 +112,6 @@ def home():
 
 from datetime import datetime, timezone
 
-import threading
 import time as time_module
 _start_time = time_module.time()
 

@@ -220,7 +220,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const { data: v3Health } = useV3HealthQuery();
 
   const apiOnline = statusData?.api === "online";
-  const v3Online = !!v3Health;
+  const aiReady = !!v3Health?.ready;
+  const aiLoading = !!v3Health?.loading;
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -248,7 +249,11 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     },
     {
       label: "AI",
-      status: v3Online ? ("online" as const) : ("offline" as const),
+      status: aiReady
+        ? ("online" as const)
+        : aiLoading
+          ? ("loading" as const)
+          : ("offline" as const),
     },
   ];
 
@@ -370,7 +375,11 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               <span
                 className={cn(
                   "w-1.5 h-1.5 rounded-full",
-                  s.status === "online" ? "bg-[#00FF85]" : "bg-[#E10600]",
+                  s.status === "online"
+                    ? "bg-[#00FF85]"
+                    : s.status === "loading"
+                      ? "bg-[#FFD400]"
+                      : "bg-[#E10600]",
                 )}
               />
               <span className="text-[10px] text-[#666] font-medium">
@@ -383,6 +392,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                       ? `${Math.round(s.latency)} ms`
                       : "Ready"}
                   </span>
+                ) : s.status === "loading" ? (
+                  <span className="text-[#FFD400]">Loading</span>
                 ) : (
                   <span className="text-[#E10600]">Down</span>
                 )}
