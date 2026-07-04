@@ -54,14 +54,25 @@ APP_BUILD = "2025-Q2"
 
 app = FastAPI(title="F1 AI Race Engineer API", version=APP_VERSION)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=os.getenv(
+origins = [
+    origin.strip()
+    for origin in os.getenv(
         "CORS_ORIGINS",
         "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080",
-    ).split(","),
+    ).split(",")
+    if origin.strip()
+]
+
+print("=" * 60)
+print("Loaded CORS Origins:")
+print(origins)
+print("=" * 60)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["X-Request-ID", "X-Response-Time"],
 )
