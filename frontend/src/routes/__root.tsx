@@ -1,11 +1,9 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
-  createRootRouteWithContext,
+  createRootRoute,
   useRouter,
-  HeadContent,
-  Scripts,
   useRouterState,
   useNavigate,
 } from "@tanstack/react-router";
@@ -15,7 +13,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { SearchModal } from "@/components/SearchModal";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { motion, AnimatePresence } from "framer-motion";
-import appCss from "../styles.css?url";
+import { queryClient } from "@/lib/queryClient";
 
 function NotFoundComponent() {
   return (
@@ -80,48 +78,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
-  {
-    head: () => ({
-      meta: [
-        { charSet: "utf-8" },
-        { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { title: "APEXiq · Race Intelligence OS" },
-        {
-          name: "description",
-          content:
-            "AI-powered Formula 1 race engineering and motorsport intelligence platform.",
-        },
-        { property: "og:title", content: "APEXiq · Race Intelligence OS" },
-        {
-          property: "og:description",
-          content:
-            "AI-powered Formula 1 race engineering and motorsport intelligence platform.",
-        },
-        { property: "og:type", content: "website" },
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: "APEXiq · Race Intelligence OS" },
-        {
-          name: "twitter:description",
-          content:
-            "AI-powered Formula 1 race engineering and motorsport intelligence platform.",
-        },
-      ],
-      links: [
-        { rel: "preconnect", href: "https://fonts.googleapis.com" },
-        {
-          rel: "preconnect",
-          href: "https://fonts.gstatic.com",
-          crossOrigin: "anonymous",
-        },
-        { rel: "stylesheet", href: appCss },
-      ],
-    }),
-    component: RootComponent,
-    notFoundComponent: NotFoundComponent,
-    errorComponent: ErrorComponent,
-  },
-);
+export const Route = createRootRoute({
+  component: RootComponent,
+  notFoundComponent: NotFoundComponent,
+  errorComponent: ErrorComponent,
+});
 
 function BootScreen({ animate = false }: { animate?: boolean }) {
   return (
@@ -156,7 +117,6 @@ function BootScreen({ animate = false }: { animate?: boolean }) {
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
   const [booting, setBooting] = useState(true);
   const [mounted, setMounted] = useState(false);
 
@@ -167,24 +127,16 @@ function RootComponent() {
   }, []);
 
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <QueryClientProvider client={queryClient}>
-          <OfflineBanner />
-          <SearchModal />
-          <AnimatePresence>
-            {booting && <BootScreen animate={mounted} />}
-          </AnimatePresence>
-          <ErrorBoundary>
-            <AppShell />
-          </ErrorBoundary>
-        </QueryClientProvider>
-        <Scripts />
-      </body>
-    </html>
+    <QueryClientProvider client={queryClient}>
+      <OfflineBanner />
+      <SearchModal />
+      <AnimatePresence>
+        {booting && <BootScreen animate={mounted} />}
+      </AnimatePresence>
+      <ErrorBoundary>
+        <AppShell />
+      </ErrorBoundary>
+    </QueryClientProvider>
   );
 }
 
