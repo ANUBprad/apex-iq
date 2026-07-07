@@ -2,9 +2,11 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 const API_KEY = import.meta.env.VITE_API_KEY || "";
 
 async function fetchApi<T>(endpoint: string, init?: RequestInit): Promise<T> {
+  const method = (init?.method ?? "GET").toUpperCase();
+  const hasBody = method !== "GET" && method !== "HEAD" && init?.body != null;
   const res = await fetch(`${API_BASE}${endpoint}`, {
     headers: {
-      "Content-Type": "application/json",
+      ...(hasBody ? { "Content-Type": "application/json" } : {}),
       ...(API_KEY ? { "X-API-Key": API_KEY } : {}),
     },
     ...init,
